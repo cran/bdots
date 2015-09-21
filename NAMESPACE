@@ -1,0 +1,17 @@
+export(doubleGauss.boot,
+		doubleGauss.fit,
+		doubleGauss.refit,
+		logistic.boot,
+		logistic.fit,
+		logistic.refit,
+		ests.plot,
+		subs.plot,
+		replot)
+
+import(nlme, mvtnorm, parallel, doParallel, doRNG, foreach)
+importFrom("grDevices", "rgb")
+importFrom("graphics", "axis", "box", "hist", "legend", "lines", "par",
+	"plot", "rect", "title")
+importFrom("stats", "ar", "coef", "cov", "p.adjust", "pnorm", "pt",
+	"qt", "rnorm", "sd")
+importFrom("utils", "tail")
