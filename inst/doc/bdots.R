@@ -8,7 +8,13 @@ library("bdots")
 
 
 ###################################################
-### code chunk number 2: bdots.Rnw:51-66
+### code chunk number 2: bdots.Rnw:44-45 (eval = FALSE)
+###################################################
+## citation("bdots")
+
+
+###################################################
+### code chunk number 3: bdots.Rnw:58-73
 ###################################################
 mini <- 0
 peak <- 1
@@ -28,7 +34,7 @@ text(c(575, 925, 800, 1000), c(0, 1, 0.18, 0.92), c("B", "P", "C", "S"))
 
 
 ###################################################
-### code chunk number 3: bdots.Rnw:79-111
+### code chunk number 4: bdots.Rnw:86-118
 ###################################################
 mu <- 800
 ht <- 0.2
@@ -65,7 +71,7 @@ text(c(560, 1150, 675, 1000, 800, 1150), c(0, 0.05, 0.07, 0.105, 0.014, 0.2),
 
 
 ###################################################
-### code chunk number 4: bdots.Rnw:131-134
+### code chunk number 5: bdots.Rnw:138-141
 ###################################################
 data(ci)
 names(ci)[1] <- "Group"
@@ -73,13 +79,13 @@ head(ci)
 
 
 ###################################################
-### code chunk number 5: bdots.Rnw:147-148
+### code chunk number 6: bdots.Rnw:154-155
 ###################################################
 ci.1 <- subset(ci, ci$LookType == "Target")
 
 
 ###################################################
-### code chunk number 6: bdots.Rnw:180-185
+### code chunk number 7: bdots.Rnw:187-192
 ###################################################
 ci.1.out.1 <- logistic.fit(ci.1, col = 4, rho.0 = 0.9, cor = TRUE,
 	cores = 2)
@@ -89,7 +95,7 @@ ci.1.out.1$cor.2
 
 
 ###################################################
-### code chunk number 7: bdots.Rnw:198-202
+### code chunk number 8: bdots.Rnw:205-209
 ###################################################
 ci.2 <- subset(ci, ci$LookType == "Cohort" | ci$LookType == "Unrelated")
 ci.2$Curve <- ifelse(ci.2$LookType == "Cohort", 1, 2)
@@ -98,31 +104,31 @@ ci.2.out.1 <- doubleGauss.fit(ci.2, col = 4, rho.0 = 0.9, cor = TRUE,
 
 
 ###################################################
-### code chunk number 8: bdots.Rnw:214-215 (eval = FALSE)
+### code chunk number 9: bdots.Rnw:221-222 (eval = FALSE)
 ###################################################
 ## subs.plot(ci.1.out.1, "topleft")
 
 
 ###################################################
-### code chunk number 9: bdots.Rnw:218-219
+### code chunk number 10: bdots.Rnw:225-226
 ###################################################
 ests.plot(ci.1.out.1)
 
 
 ###################################################
-### code chunk number 10: bdots.Rnw:226-227 (eval = FALSE)
+### code chunk number 11: bdots.Rnw:233-234 (eval = FALSE)
 ###################################################
 ## subs.plot(ci.2.out.1)
 
 
 ###################################################
-### code chunk number 11: bdots.Rnw:230-231
+### code chunk number 12: bdots.Rnw:237-238
 ###################################################
 ests.plot(ci.2.out.1)
 
 
 ###################################################
-### code chunk number 12: bdots.Rnw:252-258
+### code chunk number 13: bdots.Rnw:259-265
 ###################################################
 ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
 	subj = c(13, 23),
@@ -133,7 +139,7 @@ ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
 
 
 ###################################################
-### code chunk number 13: bdots.Rnw:264-269
+### code chunk number 14: bdots.Rnw:271-276
 ###################################################
 ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
 	subj = c(13, 23),
@@ -143,31 +149,31 @@ ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
 
 
 ###################################################
-### code chunk number 14: bdots.Rnw:309-310
+### code chunk number 15: bdots.Rnw:316-317
 ###################################################
 ci.1.out.2 <- logistic.boot(ci.1.out.1, seed = 123, cores = 2)
 
 
 ###################################################
-### code chunk number 15: bdots.Rnw:316-317
+### code chunk number 16: bdots.Rnw:323-324
 ###################################################
 logistic.boot(ci.1.out.1, seed = 123, cores = 2, test.params = TRUE)
 
 
 ###################################################
-### code chunk number 16: bdots.Rnw:322-323
+### code chunk number 17: bdots.Rnw:329-330
 ###################################################
 ci.2.out.2 <- doubleGauss.boot(ci.2.out.1, seed = 123, cores = 2, time.test = 900)
 
 
 ###################################################
-### code chunk number 17: bdots.Rnw:334-335
+### code chunk number 18: bdots.Rnw:341-342
 ###################################################
 replot(ci.1.out.2, bucket.lim = c(0, 1), main = "Example 1 Curve")
 
 
 ###################################################
-### code chunk number 18: bdots.Rnw:339-341
+### code chunk number 19: bdots.Rnw:346-348
 ###################################################
 replot(ci.2.out.2, ylim = c(-0.01, 0.1), bucket.lim = c(0, 0.08),
 	main = "Example 2 Curve")

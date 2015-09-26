@@ -10,9 +10,9 @@
 \title{Eyetracking Analysis in \proglang{R}}
 \author{Michael Seedorff\\Department of Biostatistics\\University of Iowa
    \and Jacob Oleson\\Department of Biostatistics\\University of Iowa
+   \and Grant Brown\\Department of Biostatistics\\University of Iowa
    \and Joseph Cavanaugh\\Department of Biostatistics\\University of Iowa
-   \and Bob McMurray\\Department of Psychology\\University of Iowa
-   \and Grant Brown\\Department of Biostatistics\\University of Iowa}
+   \and Bob McMurray\\Departments of Psychology, Communication Sciences and Disorders, and Linguistics\\University of Iowa}
 
 \date{}
 \begin{document}
@@ -39,7 +39,14 @@ library("bdots")
 \newpage
 \section{Introduction}
 
-This is a companion vignette to \cite{eyetracking}. We provide a sample analysis
+If using \pkg{bdots} for analysis in a paper, please cite current version using:
+
+<<eval=FALSE>>=
+citation("bdots")
+@
+
+For a reference to the statistical methods used in this package, see \cite{eyetracking}.
+In this vignette we provide a sample analysis
 of eyetracking data obtained from the study \cite{farris2014process}. We use the following
 2 functions to fit the data: a 4-parameter logistic and an asymmetric Gaussian. The
 4-parameter logistic is defined as the following:

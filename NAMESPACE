@@ -8,7 +8,9 @@ export(doubleGauss.boot,
 		subs.plot,
 		replot)
 
-import(nlme, mvtnorm, parallel, doParallel, doRNG, foreach)
+import(parallel, doParallel, doRNG, foreach)
+importFrom("nlme", "gnls", "corAR1")
+importFrom("mvtnorm", "pmvnorm", "rmvnorm", "GenzBretz")
 importFrom("grDevices", "rgb")
 importFrom("graphics", "axis", "box", "hist", "legend", "lines", "par",
 	"plot", "rect", "title")

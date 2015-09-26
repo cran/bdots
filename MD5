@@ -1,5 +1,5 @@
-fb1eae8df1aee5b1e18d1a1260f7b4de *DESCRIPTION
-6aae7d7e5118b130be5199f30e04fe44 *NAMESPACE
+b8f92683153a7f41c0631c3a68a4a0c1 *DESCRIPTION
+e1427cd0a1ae8c49fbf2ff043b71c46c *NAMESPACE
 bce060197356937ed2c9a3830b2cb1b8 *R/bucket.r
 7ec11887b99c45fba03e2ba64c1234c1 *R/bucketCalc.r
 0c290cc24a07315f4460743fddfbe941 *R/bucketPlot.r
@@ -29,9 +29,9 @@ ac0f82cb5523b045b42a00f2b7aa2c8e *R/logisticBoot.r
 800ffaa98eb66fe3af1b0177bf309ea6 *R/tsmultcomp.r
 d92784002e54d7c011ec329a4dccf0af *build/vignette.rds
 1bd630eeca131571174d6871bfcddbdc *data/ci.RData
-c77c995fe1234111d2fdf1eb402ebec4 *inst/doc/bdots.R
-76bc5250dba351a3d2db177f98552bf7 *inst/doc/bdots.Rnw
-b7395adc3edbbf4e0c6beb6b08e45ca7 *inst/doc/bdots.pdf
+cc92e1cf267e0ec9300f93a53d77a697 *inst/doc/bdots.R
+cdd78bb9f64cc0c7cf6d669d5d3634db *inst/doc/bdots.Rnw
+3e85bc256cd107e66c131ed3a379c838 *inst/doc/bdots.pdf
 749f6a80366a1b5dfb037d3ca92e3f34 *man/boot.Rd
 aec48582708c65144ee3bdf8c963eb0e *man/ci.Rd
 2e4489f97b424d39d3b894fbe47b6f29 *man/estsPlot.Rd
@@ -41,6 +41,6 @@ d6384cce19301c20e23196520793d5ab *man/refit.Rd
 55b9fad6cc90f3098aa3348121624a2d *man/subsPlot.Rd
 b2e326c351e876df0e5e23df2e02441b *vignettes/amsmath.sty
 2afab3ac083263e6144f518d4f0dc024 *vignettes/authblk.sty
-76bc5250dba351a3d2db177f98552bf7 *vignettes/bdots.Rnw
+cdd78bb9f64cc0c7cf6d669d5d3634db *vignettes/bdots.Rnw
 0435fc1f5cc9463144956cfa5e3d332b *vignettes/bdots.bib
 4025d7a8a0b3014ca62e3478c637e865 *vignettes/fullpage.sty
