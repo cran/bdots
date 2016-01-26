@@ -8,19 +8,22 @@
 	Can specify starting parameters}
 
 \usage{
-doubleGauss.refit(part1.list, subj, group, curves = NULL,
-	params = NULL, cor=NULL, rho.0 = NULL)
-logistic.refit(part1.list, subj, group, curves = NULL,
-	params = NULL, cor = NULL, rho.0 = NULL)
+doubleGauss.refit(part1.list, subj = NULL, group = NULL, curves = NULL,
+	params = NULL, cor=NULL, rho.0 = NULL, info.matrix = NULL)
+logistic.refit(part1.list, subj = NULL, group = NULL, curves = NULL,
+	params = NULL, cor = NULL, rho.0 = NULL, info.matrix = NULL)
 }
 
 \arguments{
   \item{part1.list}{Output from fitting step}
+  \item{info.matrix}{numeric matrix. Can put subj/group/curves/params information here for convenience.
+	Columns should have the following order: subj, group, curves, params. This matrix cannot contain any
+	NA/NaN values. If diffs=FALSE, this information is not used -- simply use filler values.}
   \item{subj}{numeric vector. Subject numbers (within their group) that you want to refit}
   \item{group}{numeric vector. Group numbers corresponding to subject vector}
-  \item{curves}{numeric vector. Curve numbers if it's a differences of logistics fit}
+  \item{curves}{numeric vector. Curve numbers if it's a difference of fits (i.e. diffs = TRUE)}
   \item{params}{list of numeric vectors (length 4 or 6). Parameter estimates for the 6 parameter DoubleGauss in the
-	order mu, height, variance 1, variance 2, base 1, base 2. Parameter estimate for the 4 parameter Logistic in the
+	order mu, height, sd 1, sd 2, base 1, base 2. Parameter estimate for the 4 parameter Logistic in the
 	order min, peak, slope, crossover}
   \item{cor}{logical vector. If TRUE assumes an correlation structure of AR(rho) and if FALSE assumes no
 	correlation structure}

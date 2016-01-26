@@ -139,7 +139,18 @@ ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
 
 
 ###################################################
-### code chunk number 14: bdots.Rnw:271-276
+### code chunk number 14: bdots.Rnw:273-279
+###################################################
+refit.matrix <- matrix(NA, nrow = 2, ncol = 9)
+refit.matrix[1,] <- c(13, 2, 2, 650, 0.15, 150, 100, 0, 0.03)
+refit.matrix[2,] <- c(23, 2, 2, 700, 0.10, 150, 100, 0, 0.01)
+refit.matrix
+ci.2.out.1 <- doubleGauss.refit(ci.2.out.1, cor = FALSE,
+	info.matrix = refit.matrix)
+
+
+###################################################
+### code chunk number 15: bdots.Rnw:282-287
 ###################################################
 ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
 	subj = c(13, 23),
@@ -149,31 +160,31 @@ ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
 
 
 ###################################################
-### code chunk number 15: bdots.Rnw:316-317
+### code chunk number 16: bdots.Rnw:327-328
 ###################################################
 ci.1.out.2 <- logistic.boot(ci.1.out.1, seed = 123, cores = 2)
 
 
 ###################################################
-### code chunk number 16: bdots.Rnw:323-324
+### code chunk number 17: bdots.Rnw:334-335
 ###################################################
 logistic.boot(ci.1.out.1, seed = 123, cores = 2, test.params = TRUE)
 
 
 ###################################################
-### code chunk number 17: bdots.Rnw:329-330
+### code chunk number 18: bdots.Rnw:340-341
 ###################################################
 ci.2.out.2 <- doubleGauss.boot(ci.2.out.1, seed = 123, cores = 2, time.test = 900)
 
 
 ###################################################
-### code chunk number 18: bdots.Rnw:341-342
+### code chunk number 19: bdots.Rnw:352-353
 ###################################################
 replot(ci.1.out.2, bucket.lim = c(0, 1), main = "Example 1 Curve")
 
 
 ###################################################
-### code chunk number 19: bdots.Rnw:346-348
+### code chunk number 20: bdots.Rnw:357-359
 ###################################################
 replot(ci.2.out.2, ylim = c(-0.01, 0.1), bucket.lim = c(0, 0.08),
 	main = "Example 2 Curve")

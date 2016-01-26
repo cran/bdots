@@ -6,7 +6,7 @@ doubleGauss.fit <- function(data, col, concave = TRUE, diffs = FALSE, rho.0 = 0.
 	if(diffs && !("Curve" %in% names(data))) stop("data needs to include a 'Curve' column if diffs=TRUE")
 	if(ncol(data) < col)                     stop("specified col is too large for given data")
 	if(!is.numeric(data[,col]))              stop("specified column is not numeric")
-	if(cor && (rho.0 < 0 || rho.0 > 1)) 		stop("rho.0 should be in the interval [0,1]")
+	if(cor && (rho.0 < 0 || rho.0 > 1)) 		 stop("rho.0 should be in the interval [0,1]")
 	
 	if(length(concave) == 1) concave <- rep(concave, 2)
 	
@@ -22,7 +22,27 @@ doubleGauss.fit <- function(data, col, concave = TRUE, diffs = FALSE, rho.0 = 0.
 	id.nums.g1 <- unique(data$Subject[data$Group == groups[1]])
 	#Group 2
 	id.nums.g2 <- unique(data$Subject[data$Group == groups[2]])
+	
+	# Check obs per subject
+	if(!diffs) {
+		counts <- aggregate(data[,col], list(data$Subject, data$Time, data$Group), length)
+		if(any(counts$x > 1)) {
+			warning("Some subjects have multiple observations at time slots, will average these")
+			agg <- aggregate(data[,col], list(data$Subject, data$Time, data$Group), mean)
+			names(agg) <- c("Subject", "Time", "Group", names(data)[col])
+			data <- agg
+		}
+	} else {
+		counts <- aggregate(data[,col], list(data$Subject, data$Time, data$Group, data$Curve), length)
+		if(any(counts$x > 1)) {
+			warning("Some subjects have multiple observations per curve at time slots, will average these")
+			agg <- aggregate(data[,col], list(data$Subject, data$Time, data$Group, data$Curve), mean)
+			names(agg) <- c("Subject", "Time", "Group", "Curve", names(data)[col])
+			data <- agg
+		}
+	}
 
+	# Size of groups
 	N.g1 <- length(id.nums.g1)
 	N.g2 <- length(id.nums.g2)
 	

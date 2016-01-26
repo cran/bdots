@@ -6,14 +6,15 @@ export(doubleGauss.boot,
 		logistic.refit,
 		ests.plot,
 		subs.plot,
-		replot)
+		replot,
+		subs.delete)
 
 import(parallel, doParallel, doRNG, foreach)
 importFrom("nlme", "gnls", "corAR1")
 importFrom("mvtnorm", "pmvnorm", "rmvnorm", "GenzBretz")
 importFrom("grDevices", "rgb")
 importFrom("graphics", "axis", "box", "hist", "legend", "lines", "par",
-	"plot", "rect", "title")
+	"plot", "rect", "title", "abline")
 importFrom("stats", "ar", "coef", "cov", "p.adjust", "pnorm", "pt",
-	"qt", "rnorm", "sd")
+	"qt", "rnorm", "sd", "aggregate")
 importFrom("utils", "tail")

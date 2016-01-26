@@ -6,12 +6,13 @@
 \description{ Plot subjects raw data along with function fits}
 
 \usage{
-subs.plot(part1.list, legend.spot = "topright")
+subs.plot(part1.list, legend.spot = "topright", ylim = NULL)
 }
 
 \arguments{
   \item{part1.list}{ Output from doubleGauss.fit or logistic.fit}
   \item{legend.spot}{ string. Location of the legend}
+  \item{ylim}{ If NULL, takes the min and max of all observed curves}
 
 }
 \details{ Plot subjects raw data along with function fits}

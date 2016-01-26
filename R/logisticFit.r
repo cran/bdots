@@ -20,6 +20,25 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 	id.nums.g1 <- unique(data$Subject[data$Group == groups[1]])
 	#Group 2
 	id.nums.g2 <- unique(data$Subject[data$Group == groups[2]])
+	
+	# Check obs per subject
+	if(!diffs) {
+		counts <- aggregate(data[,col], list(data$Subject, data$Time, data$Group), length)
+		if(any(counts$x > 1)) {
+			warning("Some subjects have multiple observations at time slots, will average these")
+			agg <- aggregate(data[,col], list(data$Subject, data$Time, data$Group), mean)
+			names(agg) <- c("Subject", "Time", "Group", names(data)[col])
+			data <- agg
+		}
+	} else {
+		counts <- aggregate(data[,col], list(data$Subject, data$Time, data$Group, data$Curve), length)
+		if(any(counts$x > 1)) {
+			warning("Some subjects have multiple observations per curve at time slots, will average these")
+			agg <- aggregate(data[,col], list(data$Subject, data$Time, data$Group, data$Curve), mean)
+			names(agg) <- c("Subject", "Time", "Group", "Curve", names(data)[col])
+			data <- agg
+		}
+	}
 
 	N.g1 <- length(id.nums.g1)
 	N.g2 <- length(id.nums.g2)

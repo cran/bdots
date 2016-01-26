@@ -1,4 +1,31 @@
-logistic.refit <- function(part1.list, subj, group, curves = NULL, params = NULL, cor = NULL, rho.0 = NULL) {
+logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
+	params = NULL, cor = NULL, rho.0 = NULL, info.matrix = NULL) {
+	
+	#info.matrix:
+	#	1st column: subject #
+	# 2nd column: group #
+	# 3rd column: curve #
+	# 4th column: params -- mini
+	# 5th column: params -- peak
+	# 6th column: params -- slope
+	# 7th column: params -- cross
+	if(!is.null(info.matrix)) {
+		if(any(is.na(info.matrix))) stop("Can't have any NA or NaN values in info.matrix")
+		if(!is.matrix(info.matrix)) stop("info.matrix should be a matrix")
+		if(!is.numeric(info.matrix)) stop("info.matrix should be numeric")
+		if(ncol(info.matrix) != 7)
+			stop("info.matrix should have 7 columns:
+			subject, group, curves, mini, peak, slope, cross
+			If diffs=FALSE, curves column is not used, so just set to any number")
+		subj <- info.matrix[,1]
+		group <- info.matrix[,2]
+		curves <- info.matrix[,3]
+		params <- list()
+		for(i in 1:nrow(info.matrix)) {
+			params[[i]] <- info.matrix[i, 4:7]
+		}
+	}
+	
 	if(length(subj) == 0 || length(group) == 0) stop("Need entry for 'subj' and 'group'")
 	if(length(subj) != length(group)) stop("Length of 'subj' and 'group' need to be the same")
 	if(!is.null(params) && !is.list(params)) stop("'params' needs to be a list")

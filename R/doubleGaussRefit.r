@@ -1,10 +1,40 @@
-doubleGauss.refit <- function(part1.list, subj, group, curves = NULL, params = NULL, cor = NULL, rho.0 = NULL) {
+doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
+	params = NULL, cor = NULL, rho.0 = NULL, info.matrix = NULL) {
+	
+	#info.matrix:
+	#	1st column: subject #
+	# 2nd column: group #
+	# 3rd column: curve #
+	# 4th column: params -- mu
+	# 5th column: params -- height
+	# 6th column: params -- sigma1
+	# 7th column: params -- sigma2
+	# 8th column: params -- base1
+	# 9th column: params -- base2
+	if(!is.null(info.matrix)) {
+		if(any(is.na(info.matrix))) stop("Can't have any NA or NaN values in info.matrix")
+		if(!is.matrix(info.matrix)) stop("info.matrix should be a matrix")
+		if(!is.numeric(info.matrix)) stop("info.matrix should be numeric")
+		if(ncol(info.matrix) != 9)
+			stop("info.matrix should have 7 columns:
+			subject, group, curves, mu, height, sigma1, sigma2, base1, base2
+			If diffs=FALSE, curves column is not used, so just set to any number")
+		subj <- info.matrix[,1]
+		group <- info.matrix[,2]
+		curves <- info.matrix[,3]
+		params <- list()
+		for(i in 1:nrow(info.matrix)) {
+			params[[i]] <- info.matrix[i, 4:9]
+		}
+	}
+	
 	if(length(subj) == 0 || length(group) == 0) stop("Need entry for 'subj' and 'group'")
 	if(length(subj) != length(group)) stop("Length of 'subj' and 'group' need to be the same")
 	if(!is.null(params) && !is.list(params)) stop("'params' needs to be a list")
 	if(!is.null(params) && is.list(params) && length(params) != length(subj))
 		stop("Length of 'params' should be equal to length of 'subj' and 'group'")
 	if(!is.null(cor) && !is.logical(cor)) stop("'cor' should be a vector of logicals")
+	if(!is.null(cor) && length(cor) == 1) cor <- rep(cor, length(subj))
 	if(!is.null(cor) && length(cor) != length(subj))
 		stop("Length of 'cor' should be equal to length of 'subj' and 'group'")
 	if(is.null(cor)) cor <- rep(part1.list$cor, length(subj))

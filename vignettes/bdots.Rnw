@@ -266,7 +266,18 @@ ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
 @
 
 This didn't help the estimates at all. We'll now use the second approach, relaxing
-the error correlation assumption (\texttt{cor = FALSE}).
+the error correlation assumption (\texttt{cor = FALSE}). We'll first try this using
+the newer matrix input (at this point requires the input of parameters) and then with
+the more traditional refitting approach.
+
+<<>>=
+refit.matrix <- matrix(NA, nrow = 2, ncol = 9)
+refit.matrix[1,] <- c(13, 2, 2, 650, 0.15, 150, 100, 0, 0.03)
+refit.matrix[2,] <- c(23, 2, 2, 700, 0.10, 150, 100, 0, 0.01)
+refit.matrix
+ci.2.out.1 <- doubleGauss.refit(ci.2.out.1, cor = FALSE,
+	info.matrix = refit.matrix)
+@
 
 <<>>=
 ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
