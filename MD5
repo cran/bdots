@@ -1,5 +1,5 @@
-57a6579d41564f987a9beea3e0a45a53 *DESCRIPTION
-6c59593177252719fbfb0bb3d694080f *NAMESPACE
+ffcb95f12184c1ae58b3383af1525591 *DESCRIPTION
+44fab00548283853cca887180ba66923 *NAMESPACE
 bce060197356937ed2c9a3830b2cb1b8 *R/bucket.r
 7ec11887b99c45fba03e2ba64c1234c1 *R/bucketCalc.r
 0c290cc24a07315f4460743fddfbe941 *R/bucketPlot.r
@@ -26,13 +26,14 @@ d35c244d33bcb41233134ab2178c9228 *R/logisticRefit.r
 7d7e9afd9625523b7981f888ee3488be *R/newSeed.r
 80aad7a0f9e5a14288022be55fc8f07b *R/replot.r
 9933c45668fe8b068da5f8fba5d5e574 *R/subsDelete.r
-4b61b8ada253653f4e3ffdaae38dfc2a *R/subsPlot.r
+dd69cc56aa7552b8e4805eb4ef065e23 *R/subsPlot.r
 800ffaa98eb66fe3af1b0177bf309ea6 *R/tsmultcomp.r
+ac9ead42af07d5d502aff7078cad7677 *R/writeCSV.r
 d0870a6045b72127613e1b5330230788 *build/vignette.rds
 1bd630eeca131571174d6871bfcddbdc *data/ci.RData
 aeca5885e07698b4f9e771f8a456b14b *inst/doc/bdots.R
 3b333ac8619fd784a3ddba11424c0ef8 *inst/doc/bdots.Rnw
-aabadc89eb7479c993919439ddf184b7 *inst/doc/bdots.pdf
+1d89f770b81844e96b78bace717f4835 *inst/doc/bdots.pdf
 749f6a80366a1b5dfb037d3ca92e3f34 *man/boot.Rd
 aec48582708c65144ee3bdf8c963eb0e *man/ci.Rd
 2e4489f97b424d39d3b894fbe47b6f29 *man/estsPlot.Rd
@@ -41,8 +42,9 @@ cdda6fb607a6681ed964aa4a966db8c8 *man/refit.Rd
 0c9cc98b8a585d7e8f084c4379407356 *man/replot.Rd
 4f0e92b5a5acfb0627422d6c065abc03 *man/subsDelete.Rd
 f3597a90a232954859bf0b8779dbb4f4 *man/subsPlot.Rd
+8a3dfa136f066c6c0df2a868b508336a *man/writeCSV.Rd
 b2e326c351e876df0e5e23df2e02441b *vignettes/amsmath.sty
 2afab3ac083263e6144f518d4f0dc024 *vignettes/authblk.sty
 3b333ac8619fd784a3ddba11424c0ef8 *vignettes/bdots.Rnw
-0435fc1f5cc9463144956cfa5e3d332b *vignettes/bdots.bib
+c115db6b855023cdc9895b2afa2467dd *vignettes/bdots.bib
 4025d7a8a0b3014ca62e3478c637e865 *vignettes/fullpage.sty

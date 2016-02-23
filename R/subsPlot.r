@@ -49,7 +49,10 @@ subs.plot <- function(part1.list, legend.spot = "topright", ylim = NULL) {
 			coef2 <- coef.id4
 		}
 		
-		for(i in 1:N) {
+		i <- 0
+		while(i < N) {
+			i <- i + 1
+			if(i < 1) i <- 1
 			if(diffs) {
 				y1id <- subset(data, data$Subject == id.nums[i] & data$Group == groups[g] & data$Curve == 1)
 			} else {
@@ -94,7 +97,11 @@ subs.plot <- function(part1.list, legend.spot = "topright", ylim = NULL) {
 			legend(legend.spot, lty = 1:2, col = c("black", "red"),
 				legend = c("Observed", "Fitted"))
 			
-			readline("Press 'Enter' to go to next plot")
+			read <- readline("Press 'Enter' to go to next plot  ")
+			if(read == "back") {
+				i <- i - 2
+				next
+			}
 			
 			if(diffs) {
 				y1id <- subset(data, data$Subject == id.nums[i] & data$Group == groups[g] & data$Curve == 2)
@@ -133,7 +140,11 @@ subs.plot <- function(part1.list, legend.spot = "topright", ylim = NULL) {
 				legend(legend.spot, lty = 1:2, col = c("black", "red"),
 					legend = c("Observed", "Fitted"))
 					
-				readline("Press 'Enter' to go to next plot")
+				read <- readline("Press 'Enter' to go to next plot  ")
+				if(read == "back") {
+					i <- i - 2
+					next
+				}
 			}
 		}
 	}
