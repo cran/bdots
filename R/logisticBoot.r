@@ -35,7 +35,6 @@ logistic.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired = 
 		group2.bad <- is.na(coef.id2[,1])
 	}
 
-	
 	coef.id1 <- subset(coef.id1, !group1.bad)
 	coef.id3 <- subset(coef.id3, !group1.bad)
 	coef.id2 <- subset(coef.id2, !group2.bad)

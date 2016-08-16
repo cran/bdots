@@ -27,8 +27,13 @@ doubleGauss.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired
 	N.tests <- length(time.all)
 	N.time <- length(time.all)
 	
-	group1.bad <- is.na(coef.id1[,1]) | is.na(coef.id3[,1])
-	group2.bad <- is.na(coef.id2[,1]) | is.na(coef.id4[,1])
+  if(diffs) {
+    group1.bad <- is.na(coef.id1[,1]) | is.na(coef.id3[,1])
+    group2.bad <- is.na(coef.id2[,1]) | is.na(coef.id4[,1])
+  } else {
+    group1.bad <- is.na(coef.id1[,1])
+    group2.bad <- is.na(coef.id2[,1])
+  }
 	
 	coef.id1 <- subset(coef.id1, !group1.bad)
 	coef.id3 <- subset(coef.id3, !group1.bad)

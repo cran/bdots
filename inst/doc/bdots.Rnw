@@ -287,6 +287,13 @@ ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
 	cor = c(FALSE, FALSE))
 @
 
+A summary of the quality of fits (the same summary setup as at the end of the fitting methods) can be
+output after doing refittings using the \texttt{printFits} method.
+
+<<>>=
+printFits(ci.2.out.1)
+@
+
 \newpage
 \section{Bootstrapping and Analysis}
 

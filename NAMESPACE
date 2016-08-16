@@ -8,7 +8,8 @@ export(doubleGauss.boot,
 		subs.plot,
 		replot,
 		subs.delete,
-		bdots.write.csv)
+		bdots.write.csv,
+		printFits)
 
 import(parallel, doParallel, doRNG, foreach)
 importFrom("nlme", "gnls", "corAR1")

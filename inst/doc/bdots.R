@@ -160,31 +160,37 @@ ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
 
 
 ###################################################
-### code chunk number 16: bdots.Rnw:327-328
+### code chunk number 16: bdots.Rnw:293-294
 ###################################################
-ci.1.out.2 <- logistic.boot(ci.1.out.1, seed = 123, cores = 2)
+printFits(ci.2.out.1)
 
 
 ###################################################
 ### code chunk number 17: bdots.Rnw:334-335
 ###################################################
+ci.1.out.2 <- logistic.boot(ci.1.out.1, seed = 123, cores = 2)
+
+
+###################################################
+### code chunk number 18: bdots.Rnw:341-342
+###################################################
 logistic.boot(ci.1.out.1, seed = 123, cores = 2, test.params = TRUE)
 
 
 ###################################################
-### code chunk number 18: bdots.Rnw:340-341
+### code chunk number 19: bdots.Rnw:347-348
 ###################################################
 ci.2.out.2 <- doubleGauss.boot(ci.2.out.1, seed = 123, cores = 2, time.test = 900)
 
 
 ###################################################
-### code chunk number 19: bdots.Rnw:352-353
+### code chunk number 20: bdots.Rnw:359-360
 ###################################################
 replot(ci.1.out.2, bucket.lim = c(0, 1), main = "Example 1 Curve")
 
 
 ###################################################
-### code chunk number 20: bdots.Rnw:357-359
+### code chunk number 21: bdots.Rnw:364-366
 ###################################################
 replot(ci.2.out.2, ylim = c(-0.01, 0.1), bucket.lim = c(0, 0.08),
 	main = "Example 2 Curve")
