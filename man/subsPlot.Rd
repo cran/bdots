@@ -6,21 +6,25 @@
 \description{ Plot subjects raw data along with function fits}
 
 \usage{
-subs.plot(part1.list, legend.spot = "topright", ylim = NULL)
+subs.plot(part1.list, legend.spot = "topright", ylim = NULL, groups = NA,
+	subjs = NA, curves = NA)
 }
 
 \arguments{
   \item{part1.list}{ Output from doubleGauss.fit or logistic.fit}
   \item{legend.spot}{ string. Location of the legend}
   \item{ylim}{ If NULL, takes the min and max of all observed curves}
+  \item{groups}{ Vector of groups corresponding to subjects to plot. Leave as NA for all}
+  \item{subjs}{ Vector of subjects to plot. Leave as NA for all}
+  \item{curves}{ Vector of curves to plot. Leave as NA for all}
 
 }
 \details{ Plot subjects raw data along with function fits}
 
 \value{ NULL}
 
-\note{ Options for legend.location include "topleft", "top", "topright", "right", "bottomright",
-	"bottom", "bottomleft", "left"
+\note{ Options for legend.location include "topleft", "top", "topright", "right",
+	"bottomright", "bottom", "bottomleft", "left"
 }
 
 \examples{

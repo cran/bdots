@@ -85,16 +85,16 @@ logistic.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired = 
 	##################
 	
 	if(paired) {
-		mini.cov.1 <- cov(coef.id1[,1], coef.id2[,1], use = "pairwise.complete.obs")
-		peak.cov.1 <- cov(coef.id1[,2], coef.id2[,2], use = "pairwise.complete.obs")
-		slope.cov.1 <- cov(coef.id1[,3], coef.id2[,3], use = "pairwise.complete.obs")
-		cross.cov.1 <- cov(coef.id1[,4], coef.id2[,4], use = "pairwise.complete.obs")
+		mini.cor.1 <- cor(coef.id1[,1], coef.id2[,1], use = "pairwise.complete.obs")
+		peak.cor.1 <- cor(coef.id1[,2], coef.id2[,2], use = "pairwise.complete.obs")
+		slope.cor.1 <- cor(coef.id1[,3], coef.id2[,3], use = "pairwise.complete.obs")
+		cross.cor.1 <- cor(coef.id1[,4], coef.id2[,4], use = "pairwise.complete.obs")
 		
 		if(diffs) {
-			mini.cov.2 <- cov(coef.id3[,1], coef.id4[,1], use = "pairwise.complete.obs")
-			peak.cov.2 <- cov(coef.id3[,2], coef.id4[,2], use = "pairwise.complete.obs")
-			slope.cov.2 <- cov(coef.id3[,3], coef.id4[,3], use = "pairwise.complete.obs")
-			cross.cov.2 <- cov(coef.id3[,4], coef.id4[,4], use = "pairwise.complete.obs")
+			mini.cor.2 <- cor(coef.id3[,1], coef.id4[,1], use = "pairwise.complete.obs")
+			peak.cor.2 <- cor(coef.id3[,2], coef.id4[,2], use = "pairwise.complete.obs")
+			slope.cor.2 <- cor(coef.id3[,3], coef.id4[,3], use = "pairwise.complete.obs")
+			cross.cor.2 <- cor(coef.id3[,4], coef.id4[,4], use = "pairwise.complete.obs")
 		}
 	}
 	
@@ -102,20 +102,36 @@ logistic.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired = 
 		set.seed(seed)
 		for(iter in 1:N.iter){
 			if(paired) {
+				# If paired, create vector at beginning. If not paired, completely
+				# generated from rnorm function later on
+				mini1.ran <- mini2.ran <- peak1.ran <- peak2.ran <-
+					slope1.ran <- slope2.ran <- cross1.ran <- cross2.ran <- numeric(N.g1)
 				for(i in 1:N.g1) {
 					mini <- rmvnorm(1, mean = c(coef.id1[i,1], coef.id2[i,1]),
-						sigma = matrix(c(sdev.id1[i,1] ^ 2, mini.cov.1, mini.cov.1, sdev.id2[i,1] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,1] ^ 2,
+							mini.cor.1 * sdev.id1[i,1] * sdev.id2[i,1],
+							mini.cor.1 * sdev.id1[i,1] * sdev.id2[i,1],
+							sdev.id2[i,1] ^ 2), nrow = 2))
 					peak <- rmvnorm(1, mean = c(coef.id1[i,2], coef.id2[i,2]),
-						sigma = matrix(c(sdev.id1[i,2] ^ 2, peak.cov.1, peak.cov.1, sdev.id2[i,2] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,2] ^ 2,
+							peak.cor.1 * sdev.id1[i,2] * sdev.id2[i,2],
+							peak.cor.1 * sdev.id1[i,2] * sdev.id2[i,2],
+							sdev.id2[i,2] ^ 2), nrow = 2))
 					slope <- rmvnorm(1, mean = c(coef.id1[i,3], coef.id2[i,3]),
-						sigma = matrix(c(sdev.id1[i,3] ^ 2, slope.cov.1, slope.cov.1, sdev.id2[i,3] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,3] ^ 2,
+							slope.cor.1 * sdev.id1[i,3] * sdev.id2[i,3],
+							slope.cor.1 * sdev.id1[i,3] * sdev.id2[i,3],
+							sdev.id2[i,3] ^ 2), nrow = 2))
 					cross <- rmvnorm(1, mean = c(coef.id1[i,4], coef.id2[i,4]),
-						sigma = matrix(c(sdev.id1[i,4] ^ 2, cross.cov.1, cross.cov.1, sdev.id2[i,4] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,4] ^ 2,
+							cross.cor.1 * sdev.id1[i,4] * sdev.id2[i,4],
+							cross.cor.1 * sdev.id1[i,4] * sdev.id2[i,4],
+							sdev.id2[i,4] ^ 2), nrow = 2))
 						
-					mini1.ran <- mini[1]; mini2.ran <- mini[2]
-					peak1.ran <- peak[1]; peak2.ran <- peak[2]
-					slope1.ran <- slope[1]; slope2.ran <- slope[2]
-					cross1.ran <- cross[1]; cross2.ran <- cross[2]
+					mini1.ran[i] <- mini[1]; mini2.ran[i] <- mini[2]
+					peak1.ran[i] <- peak[1]; peak2.ran[i] <- peak[2]
+					slope1.ran[i] <- slope[1]; slope2.ran[i] <- slope[2]
+					cross1.ran[i] <- cross[1]; cross2.ran[i] <- cross[2]
 				}
 			} else {
 				mini1.ran <-  rnorm(N.g1, coef.id1[,1], sdev.id1[,1])
@@ -135,21 +151,35 @@ logistic.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired = 
 			cross.1[iter] <- mean(cross1.ran); cross.2[iter] <- mean(cross2.ran)
 			
 			if(diffs) {
+				mini3.ran <- mini4.ran <- peak3.ran <- peak4.ran <-
+					slope3.ran <- slope4.ran <- cross3.ran <- cross4.ran <- numeric(N.g1)
 				if(paired) {
 					for(i in 1:N.g1) {
 						mini <- rmvnorm(1, mean = c(coef.id3[i,1], coef.id4[i,1]),
-							sigma = matrix(c(sdev.id3[i,1] ^ 2, mini.cov.1, mini.cov.1, sdev.id4[i,1] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,1] ^ 2,
+								mini.cor.2 * sdev.id3[i,1] * sdev.id4[i,1],
+								mini.cor.2 * sdev.id3[i,1] * sdev.id4[i,1],
+								sdev.id4[i,1] ^ 2), nrow = 2))
 						peak <- rmvnorm(1, mean = c(coef.id3[i,2], coef.id4[i,2]),
-							sigma = matrix(c(sdev.id3[i,2] ^ 2, peak.cov.1, peak.cov.1, sdev.id4[i,2] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,2] ^ 2,
+								peak.cor.2 * sdev.id3[i,2] * sdev.id4[i,2],
+								peak.cor.2 * sdev.id3[i,2] * sdev.id4[i,2],
+								sdev.id4[i,2] ^ 2), nrow = 2))
 						slope <- rmvnorm(1, mean = c(coef.id3[i,3], coef.id4[i,3]),
-							sigma = matrix(c(sdev.id3[i,3] ^ 2, slope.cov.1, slope.cov.1, sdev.id4[i,3] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,3] ^ 2,
+								slope.cor.2 * sdev.id3[i,3] * sdev.id4[i,3],
+								slope.cor.2 * sdev.id3[i,3] * sdev.id4[i,3],
+								sdev.id4[i,3] ^ 2), nrow = 2))
 						cross <- rmvnorm(1, mean = c(coef.id3[i,4], coef.id4[i,4]),
-							sigma = matrix(c(sdev.id3[i,4] ^ 2, cross.cov.1, cross.cov.1, sdev.id4[i,4] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,4] ^ 2,
+								cross.cor.2 * sdev.id3[i,4] * sdev.id4[i,4],
+								cross.cor.2 * sdev.id3[i,4] * sdev.id4[i,4],
+								sdev.id4[i,4] ^ 2), nrow = 2))
 						
-						mini3.ran <- mini[1]; mini4.ran <- mini[2]
-						peak3.ran <- peak[1]; peak4.ran <- peak[2]
-						slope3.ran <- slope[1]; slope4.ran <- slope[2]
-						cross3.ran <- cross[1]; cross4.ran <- cross[2]
+						mini3.ran[i] <- mini[1]; mini4.ran[i] <- mini[2]
+						peak3.ran[i] <- peak[1]; peak4.ran[i] <- peak[2]
+						slope3.ran[i] <- slope[1]; slope4.ran[i] <- slope[2]
+						cross3.ran[i] <- cross[1]; cross4.ran[i] <- cross[2]
 					}
 				} else {
 					mini3.ran <-  rnorm(N.g1, coef.id3[,1], sdev.id3[,1]) 
@@ -201,22 +231,36 @@ logistic.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired = 
 		cl <- makePSOCKcluster(cores)
 		registerDoParallel(cl)
 		
-		for.out <- foreach(iter = 1:N.iter, .combine = rbind, .options.RNG = seed) %dorng% {
+		for.out <- foreach(iter = 1:N.iter, .combine = rbind, .options.RNG = seed, .packages = "mvtnorm") %dorng% {
 			if(paired) {
+				mini1.ran <- mini2.ran <- peak1.ran <- peak2.ran <-
+					slope1.ran <- slope2.ran <- cross1.ran <- cross2.ran <- numeric(N.g1)
 				for(i in 1:N.g1) {
 					mini <- rmvnorm(1, mean = c(coef.id1[i,1], coef.id2[i,1]),
-						sigma = matrix(c(sdev.id1[i,1] ^ 2, mini.cov.1, mini.cov.1, sdev.id2[i,1] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,1] ^ 2,
+							mini.cor.1 * sdev.id1[i,1] * sdev.id2[i,1],
+							mini.cor.1 * sdev.id1[i,1] * sdev.id2[i,1],
+							sdev.id2[i,1] ^ 2), nrow = 2))
 					peak <- rmvnorm(1, mean = c(coef.id1[i,2], coef.id2[i,2]),
-						sigma = matrix(c(sdev.id1[i,2] ^ 2, peak.cov.1, peak.cov.1, sdev.id2[i,2] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,2] ^ 2,
+							peak.cor.1 * sdev.id1[i,2] * sdev.id2[i,2],
+							peak.cor.1 * sdev.id1[i,2] * sdev.id2[i,2],
+							sdev.id2[i,2] ^ 2), nrow = 2))
 					slope <- rmvnorm(1, mean = c(coef.id1[i,3], coef.id2[i,3]),
-						sigma = matrix(c(sdev.id1[i,3] ^ 2, slope.cov.1, slope.cov.1, sdev.id2[i,3] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,3] ^ 2,
+							slope.cor.1 * sdev.id1[i,3] * sdev.id2[i,3],
+							slope.cor.1 * sdev.id1[i,3] * sdev.id2[i,3],
+							sdev.id2[i,3] ^ 2), nrow = 2))
 					cross <- rmvnorm(1, mean = c(coef.id1[i,4], coef.id2[i,4]),
-						sigma = matrix(c(sdev.id1[i,4] ^ 2, cross.cov.1, cross.cov.1, sdev.id2[i,4] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,4] ^ 2,
+							cross.cor.1 * sdev.id1[i,4] * sdev.id2[i,4],
+							cross.cor.1 * sdev.id1[i,4] * sdev.id2[i,4],
+							sdev.id2[i,4] ^ 2), nrow = 2))
 						
-					mini1.ran <- mini[1]; mini2.ran <- mini[2]
-					peak1.ran <- peak[1]; peak2.ran <- peak[2]
-					slope1.ran <- slope[1]; slope2.ran <- slope[2]
-					cross1.ran <- cross[1]; cross2.ran <- cross[2]
+					mini1.ran[i] <- mini[1]; mini2.ran[i] <- mini[2]
+					peak1.ran[i] <- peak[1]; peak2.ran[i] <- peak[2]
+					slope1.ran[i] <- slope[1]; slope2.ran[i] <- slope[2]
+					cross1.ran[i] <- cross[1]; cross2.ran[i] <- cross[2]
 				}
 			} else {
 				mini1.ran <-  rnorm(N.g1, coef.id1[,1], sdev.id1[,1])
@@ -237,15 +281,29 @@ logistic.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired = 
 			
 			if(diffs) {
 				if(paired) {
+					mini3.ran <- mini4.ran <- peak3.ran <- peak4.ran <-
+						slope3.ran <- slope4.ran <- cross3.ran <- cross4.ran <- numeric(N.g1)
 					for(i in 1:N.g1) {
 						mini <- rmvnorm(1, mean = c(coef.id3[i,1], coef.id4[i,1]),
-							sigma = matrix(c(sdev.id3[i,1] ^ 2, mini.cov.1, mini.cov.1, sdev.id4[i,1] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,1] ^ 2,
+								mini.cor.2 * sdev.id3[i,1] * sdev.id4[i,1],
+								mini.cor.2 * sdev.id3[i,1] * sdev.id4[i,1],
+								sdev.id4[i,1] ^ 2), nrow = 2))
 						peak <- rmvnorm(1, mean = c(coef.id3[i,2], coef.id4[i,2]),
-							sigma = matrix(c(sdev.id3[i,2] ^ 2, peak.cov.1, peak.cov.1, sdev.id4[i,2] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,2] ^ 2,
+								peak.cor.2 * sdev.id3[i,2] * sdev.id4[i,2],
+								peak.cor.2 * sdev.id3[i,2] * sdev.id4[i,2],
+								sdev.id4[i,2] ^ 2), nrow = 2))
 						slope <- rmvnorm(1, mean = c(coef.id3[i,3], coef.id4[i,3]),
-							sigma = matrix(c(sdev.id3[i,3] ^ 2, slope.cov.1, slope.cov.1, sdev.id4[i,3] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,3] ^ 2,
+								slope.cor.2 * sdev.id3[i,3] * sdev.id4[i,3],
+								slope.cor.2 * sdev.id3[i,3] * sdev.id4[i,3],
+								sdev.id4[i,3] ^ 2), nrow = 2))
 						cross <- rmvnorm(1, mean = c(coef.id3[i,4], coef.id4[i,4]),
-							sigma = matrix(c(sdev.id3[i,4] ^ 2, cross.cov.1, cross.cov.1, sdev.id4[i,4] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,4] ^ 2,
+								cross.cor.2 * sdev.id3[i,4] * sdev.id4[i,4],
+								cross.cor.2 * sdev.id3[i,4] * sdev.id4[i,4],
+								sdev.id4[i,4] ^ 2), nrow = 2))
 						
 						mini3.ran <- mini[1]; mini4.ran <- mini[2]
 						peak3.ran <- peak[1]; peak4.ran <- peak[2]

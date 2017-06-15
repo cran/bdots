@@ -1,9 +1,13 @@
-subs.delete <- function(part1.list, subj, group) {
-	if(length(subj) != length(group)) stop("subj and group should be the same length")
-	if(any(group != 1 & group != 2)) stop("all entries in group should be a 1 or 2")
-
-	subs.1 <- subj[group == 1]
-	subs.2 <- subj[group == 2]
+subs.delete <- function(part1.list, subjs, groups) {
+	if(length(subjs) != length(groups)) stop("subjs and groups should be the same length")
+  
+  if(any(!(groups %in% part1.list$groups))) stop("Some values in 'groups' input are not valid groups from the data set")
+  groups <- ifelse(groups == part1.list$groups[1], 1, 2)
+  
+  if(!all((groups == 1 & subjs %in% part1.list$id.nums.g1) | (groups == 2 & subjs %in% part1.list$id.nums.g2))) stop("Some subject numbers aren't in corresponding groups")
+	subs.1 <- subs.2 <- numeric(0)
+  if(any(groups == 1)) subs.1 <- vapply(subjs[groups == 1], function(x) which(part1.list$id.nums.g1 == x), numeric(1))
+	if(any(groups == 2)) subs.2 <- vapply(subjs[groups == 2], function(x) which(part1.list$id.nums.g2 == x), numeric(1))
 	
 	group.1 <- as.character(part1.list$groups[1])
 	group.2 <- as.character(part1.list$groups[2])

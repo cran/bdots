@@ -18,5 +18,5 @@ importFrom("grDevices", "rgb")
 importFrom("graphics", "axis", "box", "hist", "legend", "lines", "par",
 	"plot", "rect", "title", "abline")
 importFrom("stats", "ar", "coef", "cov", "p.adjust", "pnorm", "pt",
-	"qt", "rnorm", "sd", "aggregate")
+	"qt", "rnorm", "sd", "aggregate", "cor")
 importFrom("utils", "tail", "write.csv")

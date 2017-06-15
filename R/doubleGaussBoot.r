@@ -93,20 +93,20 @@ doubleGauss.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired
 	##################
 	
 	if(paired) {
-		mu.cov.1 <- cov(coef.id1[,1], coef.id2[,1], use = "pairwise.complete.obs")
-		ht.cov.1 <- cov(coef.id1[,2], coef.id2[,2], use = "pairwise.complete.obs")
-		s1.cov.1 <- cov(coef.id1[,3], coef.id2[,3], use = "pairwise.complete.obs")
-		s2.cov.1 <- cov(coef.id1[,4], coef.id2[,4], use = "pairwise.complete.obs")
-		b1.cov.1 <- cov(coef.id1[,5], coef.id2[,5], use = "pairwise.complete.obs")
-		b2.cov.1 <- cov(coef.id1[,6], coef.id2[,6], use = "pairwise.complete.obs")
+		mu.cor.1 <- cor(coef.id1[,1], coef.id2[,1], use = "pairwise.complete.obs")
+		ht.cor.1 <- cor(coef.id1[,2], coef.id2[,2], use = "pairwise.complete.obs")
+		s1.cor.1 <- cor(coef.id1[,3], coef.id2[,3], use = "pairwise.complete.obs")
+		s2.cor.1 <- cor(coef.id1[,4], coef.id2[,4], use = "pairwise.complete.obs")
+		b1.cor.1 <- cor(coef.id1[,5], coef.id2[,5], use = "pairwise.complete.obs")
+		b2.cor.1 <- cor(coef.id1[,6], coef.id2[,6], use = "pairwise.complete.obs")
 		
 		if(diffs) {
-			mu.cov.2 <- cov(coef.id3[,1], coef.id4[,1], use = "pairwise.complete.obs")
-			ht.cov.2 <- cov(coef.id3[,2], coef.id4[,2], use = "pairwise.complete.obs")
-			s1.cov.2 <- cov(coef.id3[,3], coef.id4[,3], use = "pairwise.complete.obs")
-			s2.cov.2 <- cov(coef.id3[,4], coef.id4[,4], use = "pairwise.complete.obs")
-			b1.cov.2 <- cov(coef.id3[,5], coef.id4[,5], use = "pairwise.complete.obs")
-			b2.cov.2 <- cov(coef.id3[,6], coef.id4[,6], use = "pairwise.complete.obs")
+			mu.cor.2 <- cor(coef.id3[,1], coef.id4[,1], use = "pairwise.complete.obs")
+			ht.cor.2 <- cor(coef.id3[,2], coef.id4[,2], use = "pairwise.complete.obs")
+			s1.cor.2 <- cor(coef.id3[,3], coef.id4[,3], use = "pairwise.complete.obs")
+			s2.cor.2 <- cor(coef.id3[,4], coef.id4[,4], use = "pairwise.complete.obs")
+			b1.cor.2 <- cor(coef.id3[,5], coef.id4[,5], use = "pairwise.complete.obs")
+			b2.cor.2 <- cor(coef.id3[,6], coef.id4[,6], use = "pairwise.complete.obs")
 		}
 	}
 
@@ -116,17 +116,35 @@ doubleGauss.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired
 			if(paired) {
 				for(i in 1:N.g1) {
 					mu <- rmvnorm(1, mean = c(coef.id1[i,1], coef.id2[i,1]),
-						sigma = matrix(c(sdev.id1[i,1] ^ 2, mu.cov.1, mu.cov.1, sdev.id2[i,1] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,1] ^ 2,
+							mu.cor.1 * sdev.id1[i,1] * sdev.id2[i,1],
+							mu.cor.1 * sdev.id1[i,1] * sdev.id2[i,1],
+							sdev.id2[i,1] ^ 2), nrow = 2))
 					ht <- rmvnorm(1, mean = c(coef.id1[i,2], coef.id2[i,2]),
-						sigma = matrix(c(sdev.id1[i,2] ^ 2, ht.cov.1, ht.cov.1, sdev.id2[i,2] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,2] ^ 2,
+							ht.cor.1 * sdev.id1[i,2] * sdev.id2[i,2],
+							ht.cor.1 * sdev.id1[i,2] * sdev.id2[i,2],
+							sdev.id2[i,2] ^ 2), nrow = 2))
 					s1 <- rmvnorm(1, mean = c(coef.id1[i,3], coef.id2[i,3]),
-						sigma = matrix(c(sdev.id1[i,3] ^ 2, s1.cov.1, s1.cov.1, sdev.id2[i,3] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,3] ^ 2,
+							s1.cor.1 * sdev.id1[i,3] * sdev.id2[i,3],
+							s1.cor.1 * sdev.id1[i,3] * sdev.id2[i,3],
+							sdev.id2[i,3] ^ 2), nrow = 2))
 					s2 <- rmvnorm(1, mean = c(coef.id1[i,4], coef.id2[i,4]),
-						sigma = matrix(c(sdev.id1[i,4] ^ 2, s2.cov.1, s2.cov.1, sdev.id2[i,4] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,4] ^ 2,
+							s2.cor.1 * sdev.id1[i,4] * sdev.id2[i,4],
+							s2.cor.1 * sdev.id1[i,4] * sdev.id2[i,4],
+							sdev.id2[i,4] ^ 2), nrow = 2))
 					b1 <- rmvnorm(1, mean = c(coef.id1[i,5], coef.id2[i,5]),
-						sigma = matrix(c(sdev.id1[i,5] ^ 2, b1.cov.1, b1.cov.1, sdev.id2[i,5] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,5] ^ 2,
+							b1.cor.1 * sdev.id1[i,5] * sdev.id2[i,5],
+							b1.cor.1 * sdev.id1[i,5] * sdev.id2[i,5],
+							sdev.id2[i,5] ^ 2), nrow = 2))
 					b2 <- rmvnorm(1, mean = c(coef.id1[i,6], coef.id2[i,6]),
-						sigma = matrix(c(sdev.id1[i,6] ^ 2, b2.cov.1, b2.cov.1, sdev.id2[i,6] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,6] ^ 2,
+							b2.cor.1 * sdev.id1[i,6] * sdev.id2[i,6],
+							b2.cor.1 * sdev.id1[i,6] * sdev.id2[i,6],
+							sdev.id2[i,6] ^ 2), nrow = 2))
 						
 					mu1.ran <- mu[1]; mu2.ran <- mu[2]
 					ht1.ran <- ht[1]; ht2.ran <- ht[2]
@@ -162,17 +180,35 @@ doubleGauss.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired
 				if(paired) {
 					for(i in 1:N.g1) {
 						mu <- rmvnorm(1, mean = c(coef.id3[i,1], coef.id4[i,1]),
-							sigma = matrix(c(sdev.id1[i,1] ^ 2, mu.cov.2, mu.cov.2, sdev.id2[i,1] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,1] ^ 2,
+								mu.cor.2 * sdev.id3[i,1] * sdev.id4[i,1],
+								mu.cor.2 * sdev.id3[i,1] * sdev.id4[i,1],
+								sdev.id4[i,1] ^ 2), nrow = 2))
 						ht <- rmvnorm(1, mean = c(coef.id3[i,2], coef.id4[i,2]),
-							sigma = matrix(c(sdev.id1[i,2] ^ 2, ht.cov.2, ht.cov.2, sdev.id2[i,2] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,2] ^ 2,
+								ht.cor.2 * sdev.id3[i,2] * sdev.id4[i,2],
+								ht.cor.2 * sdev.id3[i,2] * sdev.id4[i,2],
+								sdev.id4[i,2] ^ 2), nrow = 2))
 						s1 <- rmvnorm(1, mean = c(coef.id3[i,3], coef.id4[i,3]),
-							sigma = matrix(c(sdev.id1[i,3] ^ 2, s1.cov.2, s1.cov.2, sdev.id2[i,3] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,3] ^ 2,
+								s1.cor.2 * sdev.id3[i,3] * sdev.id4[i,3],
+								s1.cor.2 * sdev.id3[i,3] * sdev.id4[i,3],
+								sdev.id4[i,3] ^ 2), nrow = 2))
 						s2 <- rmvnorm(1, mean = c(coef.id3[i,4], coef.id4[i,4]),
-							sigma = matrix(c(sdev.id1[i,4] ^ 2, s2.cov.2, s2.cov.2, sdev.id2[i,4] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,4] ^ 2,
+								s2.cor.2 * sdev.id3[i,4] * sdev.id4[i,4],
+								s2.cor.2 * sdev.id3[i,4] * sdev.id4[i,4],
+								sdev.id4[i,4] ^ 2), nrow = 2))
 						b1 <- rmvnorm(1, mean = c(coef.id3[i,5], coef.id4[i,5]),
-							sigma = matrix(c(sdev.id1[i,5] ^ 2, b1.cov.2, b1.cov.2, sdev.id2[i,5] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,5] ^ 2,
+								b1.cor.2 * sdev.id3[i,5] * sdev.id4[i,5],
+								b1.cor.2 * sdev.id3[i,5] * sdev.id4[i,5],
+								sdev.id4[i,5] ^ 2), nrow = 2))
 						b2 <- rmvnorm(1, mean = c(coef.id3[i,6], coef.id4[i,6]),
-							sigma = matrix(c(sdev.id1[i,6] ^ 2, b2.cov.2, b2.cov.2, sdev.id2[i,6] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,6] ^ 2,
+								b2.cor.2 * sdev.id3[i,6] * sdev.id4[i,6],
+								b2.cor.2 * sdev.id3[i,6] * sdev.id4[i,6],
+								sdev.id4[i,6] ^ 2), nrow = 2))
 							
 						mu3.ran <- mu[1]; mu4.ran <- mu[2]
 						ht3.ran <- ht[1]; ht4.ran <- ht[2]
@@ -240,17 +276,35 @@ doubleGauss.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired
 			if(paired) {
 				for(i in 1:N.g1) {
 					mu <- rmvnorm(1, mean = c(coef.id1[i,1], coef.id2[i,1]),
-						sigma = matrix(c(sdev.id1[i,1] ^ 2, mu.cov.1, mu.cov.1, sdev.id2[i,1] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,1] ^ 2,
+							mu.cor.1 * sdev.id1[i,1] * sdev.id2[i,1],
+							mu.cor.1 * sdev.id1[i,1] * sdev.id2[i,1],
+							sdev.id2[i,1] ^ 2), nrow = 2))
 					ht <- rmvnorm(1, mean = c(coef.id1[i,2], coef.id2[i,2]),
-						sigma = matrix(c(sdev.id1[i,2] ^ 2, ht.cov.1, ht.cov.1, sdev.id2[i,2] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,2] ^ 2,
+							ht.cor.1 * sdev.id1[i,2] * sdev.id2[i,2],
+							ht.cor.1 * sdev.id1[i,2] * sdev.id2[i,2],
+							sdev.id2[i,2] ^ 2), nrow = 2))
 					s1 <- rmvnorm(1, mean = c(coef.id1[i,3], coef.id2[i,3]),
-						sigma = matrix(c(sdev.id1[i,3] ^ 2, s1.cov.1, s1.cov.1, sdev.id2[i,3] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,3] ^ 2,
+							s1.cor.1 * sdev.id1[i,3] * sdev.id2[i,3],
+							s1.cor.1 * sdev.id1[i,3] * sdev.id2[i,3],
+							sdev.id2[i,3] ^ 2), nrow = 2))
 					s2 <- rmvnorm(1, mean = c(coef.id1[i,4], coef.id2[i,4]),
-						sigma = matrix(c(sdev.id1[i,4] ^ 2, s2.cov.1, s2.cov.1, sdev.id2[i,4] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,4] ^ 2,
+							s2.cor.1 * sdev.id1[i,4] * sdev.id2[i,4],
+							s2.cor.1 * sdev.id1[i,4] * sdev.id2[i,4],
+							sdev.id2[i,4] ^ 2), nrow = 2))
 					b1 <- rmvnorm(1, mean = c(coef.id1[i,5], coef.id2[i,5]),
-						sigma = matrix(c(sdev.id1[i,5] ^ 2, b1.cov.1, b1.cov.1, sdev.id2[i,5] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,5] ^ 2,
+							b1.cor.1 * sdev.id1[i,5] * sdev.id2[i,5],
+							b1.cor.1 * sdev.id1[i,5] * sdev.id2[i,5],
+							sdev.id2[i,5] ^ 2), nrow = 2))
 					b2 <- rmvnorm(1, mean = c(coef.id1[i,6], coef.id2[i,6]),
-						sigma = matrix(c(sdev.id1[i,6] ^ 2, b2.cov.1, b2.cov.1, sdev.id2[i,6] ^ 2), nrow = 2))
+						sigma = matrix(c(sdev.id1[i,6] ^ 2,
+							b2.cor.1 * sdev.id1[i,6] * sdev.id2[i,6],
+							b2.cor.1 * sdev.id1[i,6] * sdev.id2[i,6],
+							sdev.id2[i,6] ^ 2), nrow = 2))
 						
 					mu1.ran <- mu[1]; mu2.ran <- mu[2]
 					ht1.ran <- ht[1]; ht2.ran <- ht[2]
@@ -286,17 +340,35 @@ doubleGauss.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired
 				if(paired) {
 					for(i in 1:N.g1) {
 						mu <- rmvnorm(1, mean = c(coef.id3[i,1], coef.id4[i,1]),
-							sigma = matrix(c(sdev.id1[i,1] ^ 2, mu.cov.2, mu.cov.2, sdev.id2[i,1] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,1] ^ 2,
+								mu.cor.2 * sdev.id3[i,1] * sdev.id4[i,1],
+								mu.cor.2 * sdev.id3[i,1] * sdev.id4[i,1],
+								sdev.id4[i,1] ^ 2), nrow = 2))
 						ht <- rmvnorm(1, mean = c(coef.id3[i,2], coef.id4[i,2]),
-							sigma = matrix(c(sdev.id1[i,2] ^ 2, ht.cov.2, ht.cov.2, sdev.id2[i,2] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,2] ^ 2,
+								ht.cor.2 * sdev.id3[i,2] * sdev.id4[i,2],
+								ht.cor.2 * sdev.id3[i,2] * sdev.id4[i,2],
+								sdev.id4[i,2] ^ 2), nrow = 2))
 						s1 <- rmvnorm(1, mean = c(coef.id3[i,3], coef.id4[i,3]),
-							sigma = matrix(c(sdev.id1[i,3] ^ 2, s1.cov.2, s1.cov.2, sdev.id2[i,3] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,3] ^ 2,
+								s1.cor.2 * sdev.id3[i,3] * sdev.id4[i,3],
+								s1.cor.2 * sdev.id3[i,3] * sdev.id4[i,3],
+								sdev.id4[i,3] ^ 2), nrow = 2))
 						s2 <- rmvnorm(1, mean = c(coef.id3[i,4], coef.id4[i,4]),
-							sigma = matrix(c(sdev.id1[i,4] ^ 2, s2.cov.2, s2.cov.2, sdev.id2[i,4] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,4] ^ 2,
+								s2.cor.2 * sdev.id3[i,4] * sdev.id4[i,4],
+								s2.cor.2 * sdev.id3[i,4] * sdev.id4[i,4],
+								sdev.id4[i,4] ^ 2), nrow = 2))
 						b1 <- rmvnorm(1, mean = c(coef.id3[i,5], coef.id4[i,5]),
-							sigma = matrix(c(sdev.id1[i,5] ^ 2, b1.cov.2, b1.cov.2, sdev.id2[i,5] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,5] ^ 2,
+								b1.cor.2 * sdev.id3[i,5] * sdev.id4[i,5],
+								b1.cor.2 * sdev.id3[i,5] * sdev.id4[i,5],
+								sdev.id4[i,5] ^ 2), nrow = 2))
 						b2 <- rmvnorm(1, mean = c(coef.id3[i,6], coef.id4[i,6]),
-							sigma = matrix(c(sdev.id1[i,6] ^ 2, b2.cov.2, b2.cov.2, sdev.id2[i,6] ^ 2), nrow = 2))
+							sigma = matrix(c(sdev.id3[i,6] ^ 2,
+								b2.cor.2 * sdev.id3[i,6] * sdev.id4[i,6],
+								b2.cor.2 * sdev.id3[i,6] * sdev.id4[i,6],
+								sdev.id4[i,6] ^ 2), nrow = 2))
 							
 						mu3.ran <- mu[1]; mu4.ran <- mu[2]
 						ht3.ran <- ht[1]; ht4.ran <- ht[2]

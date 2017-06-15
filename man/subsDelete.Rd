@@ -6,13 +6,13 @@
 \description{ Delete individual subjects from both data and fits}
 
 \usage{
-subs.delete(part1.list, subj, group)
+subs.delete(part1.list, subjs, groups)
 }
 
 \arguments{
   \item{part1.list}{ Output from doubleGauss.fit or logistic.fit}
-  \item{subj}{ numeric. Subject numbers to remove.}
-  \item{group}{ numeric. Corresponding group numbers to subjects.}
+  \item{subjs}{ numeric. Subject numbers to remove.}
+  \item{groups}{ numeric. Corresponding group numbers to subjects.}
 
 }
 \details{ Delete individual subjects from both data and fits}

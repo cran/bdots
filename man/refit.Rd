@@ -16,9 +16,6 @@ logistic.refit(part1.list, subj = NULL, group = NULL, curves = NULL,
 
 \arguments{
   \item{part1.list}{Output from fitting step}
-  \item{info.matrix}{numeric matrix. Can put subj/group/curves/params information here for convenience.
-	Columns should have the following order: subj, group, curves, params. This matrix cannot contain any
-	NA/NaN values. If diffs=FALSE, this information is not used -- simply use filler values.}
   \item{subj}{numeric vector. Subject numbers (within their group) that you want to refit}
   \item{group}{numeric vector. Group numbers corresponding to subject vector}
   \item{curves}{numeric vector. Curve numbers if it's a difference of fits (i.e. diffs = TRUE)}
@@ -28,7 +25,9 @@ logistic.refit(part1.list, subj = NULL, group = NULL, curves = NULL,
   \item{cor}{logical vector. If TRUE assumes an correlation structure of AR(rho) and if FALSE assumes no
 	correlation structure}
   \item{rho.0}{numeric. assumed autocorrelation of errors for subject's curve}
-
+  \item{info.matrix}{numeric matrix. Can put subj/group/curves/params information here for convenience.
+	Columns should have the following order: subj, group, curves, params. This matrix cannot contain any
+	NA/NaN values. If diffs=FALSE, this information is not used -- simply use filler values.}
 }
 \details{ Refit Subjects from 2 groups with the 6-parameter Double Gaussian or the 4-parameter Logistic.
 	Can specify starting parameters}

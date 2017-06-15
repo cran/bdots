@@ -3,7 +3,7 @@ logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
 	
 	#info.matrix:
 	#	1st column: subject #
-	# 2nd column: group #
+	# 2nd column: groups #
 	# 3rd column: curve #
 	# 4th column: params -- mini
 	# 5th column: params -- peak
@@ -12,17 +12,16 @@ logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
 	if(!is.null(info.matrix)) {
 		if(any(is.na(info.matrix))) stop("Can't have any NA or NaN values in info.matrix")
 		if(!is.matrix(info.matrix)) stop("info.matrix should be a matrix")
-		if(!is.numeric(info.matrix)) stop("info.matrix should be numeric")
 		if(ncol(info.matrix) != 7)
 			stop("info.matrix should have 7 columns:
-			subject, group, curves, mini, peak, slope, cross
+			subject, groups, curves, mini, peak, slope, cross
 			If diffs=FALSE, curves column is not used, so just set to any number")
-		subj <- info.matrix[,1]
+		subj <- as.numeric(info.matrix[,1])
 		group <- info.matrix[,2]
-		curves <- info.matrix[,3]
+		curves <- as.numeric(info.matrix[,3])
 		params <- list()
 		for(i in 1:nrow(info.matrix)) {
-			params[[i]] <- info.matrix[i, 4:7]
+			params[[i]] <- as.numeric(info.matrix[i, 4:7])
 		}
 	}
 	
@@ -35,8 +34,17 @@ logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
 	if(!is.null(cor) && length(cor) != length(subj))
 		stop("Length of 'cor' should be equal to length of 'subj' and 'group'")
 	if(is.null(cor)) cor <- rep(part1.list$cor, length(subj))
+  
+  if(any(!(group %in% part1.list$groups))) stop("Some values in 'group' input are not valid groups from the data set")
+  group <- ifelse(group == part1.list$groups[1], 1, 2)
+  
+  if(!all((group == 1 & subj %in% part1.list$id.nums.g1) | (group == 2 & subj %in% part1.list$id.nums.g2))) stop("Some subject numbers aren't in corresponding group")
+  if(any(group == 1)) subj[group == 1] <- vapply(subj[group == 1], function(x) which(part1.list$id.nums.g1 == x), numeric(1))
+	if(any(group == 2)) subj[group == 2] <- vapply(subj[group == 2], function(x) which(part1.list$id.nums.g2 == x), numeric(1))
+	subj <- as.numeric(subj)
 	
 	diffs <- part1.list$diffs
+  if(diffs && length(curves) != length(subj)) stop("Length of 'curves' and 'subj' need to be the same")
 	
 	data <- part1.list$data
 	id.nums.g1 <- part1.list$id.nums.g1
@@ -119,9 +127,14 @@ logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
 					SSE <- sum(y.err ^ 2)
 					R2.g1.2[subj[i]] <- 1 - SSE / SSY
 				}
-				cat("Subject = ", subj[i], ", Group = ", group[i], ", Curve = ", curves[i],
-										", Old R2 = ", round(old.R2, 3), ", New R2 = ", round(R2.g1.2[subj[i]], 3),
-										"\n\t Old AR1 = ", as.logical(old.cor), ", New AR1 = ", as.logical(cor.3[subj[i]]), "\n")
+				cat("Subject = ", as.character(id.nums.g1[subj[i]]),
+						", Group = ", as.character(groups[group[i]]),
+						", Curve = ", curves[i],
+						", Old R2 = ", round(old.R2, 3),
+						", New R2 = ", round(R2.g1.2[subj[i]], 3),
+						"\n\t Old AR1 = ", as.logical(old.cor),
+						", New AR1 = ", as.logical(cor.3[subj[i]]),
+						"\n")
 			} else {
 				old.R2 <- R2.g1.1[subj[i]]
 				old.cor <- cor.1[subj[i]]
@@ -146,9 +159,14 @@ logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
 					SSE <- sum(y.err ^ 2)
 					R2.g1.1[subj[i]] <- 1 - SSE / SSY
 				}
-				cat("Subject = ", subj[i], ", Group = ", group[i], ", Curve = ", curves[i],
-											", Old R2 = ", round(old.R2, 3), ", New R2 = ", round(R2.g1.1[subj[i]], 3),
-											"\n\t Old AR1 = ", as.logical(old.cor), ", New AR1 = ", as.logical(cor.1[subj[i]]), "\n")
+				cat("Subject = ", as.character(id.nums.g1[subj[i]]),
+						", Group = ", as.character(groups[group[i]]),
+						", Curve = ", curves[i],
+						", Old R2 = ", round(old.R2, 3),
+						", New R2 = ", round(R2.g1.1[subj[i]], 3),
+						"\n\t Old AR1 = ", as.logical(old.cor),
+						", New AR1 = ", as.logical(cor.1[subj[i]]),
+						"\n")
 		}} else {
 			if(diffs) {
 				y1id <- subset(data, data$Subject == id.nums.g2[subj[i]] & data$Group == groups[2] & data$Curve == curves[i])
@@ -183,9 +201,14 @@ logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
 					SSE <- sum(y.err ^ 2)
 					R2.g2.2[subj[i]] <- 1 - SSE / SSY
 				}
-				cat("Subject = ", subj[i], ", Group = ", group[i], ", Curve = ", curves[i],
-											", Old R2 = ", round(old.R2, 3), ", New R2 = ", round(R2.g2.2[subj[i]], 3),
-											"\n\t Old AR1 = ", as.logical(old.cor), ", New AR1 = ", as.logical(cor.4[subj[i]]), "\n")
+				cat("Subject = ", as.character(id.nums.g2[subj[i]]),
+						", Group = ", as.character(groups[group[i]]),
+						", Curve = ", curves[i],
+						", Old R2 = ", round(old.R2, 3),
+						", New R2 = ", round(R2.g2.2[subj[i]], 3),
+						"\n\t Old AR1 = ", as.logical(old.cor),
+						", New AR1 = ", as.logical(cor.4[subj[i]]),
+						"\n")
 			} else {
 				old.R2 <- R2.g2.1[subj[i]]
 				old.cor <- cor.2[subj[i]]
@@ -210,10 +233,15 @@ logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
 					SSE <- sum(y.err ^ 2)
 					R2.g2.1[subj[i]] <- 1 - SSE / SSY
 				}
-				cat("Subject = ", subj[i], ", Group = ", group[i], ", Curve = ", curves[i],
-											", Old R2 = ", round(old.R2, 3), ", New R2 = ", round(R2.g2.1[subj[i]], 3),
-											"\n\t Old AR1 = ", as.logical(old.cor), ", New AR1 = ", as.logical(cor.2[subj[i]]), "\n")
-		}
+				cat("Subject = ", as.character(id.nums.g2[subj[i]]),
+						", Group = ", as.character(groups[group[i]]),
+						", Curve = ", curves[i],
+						", Old R2 = ", round(old.R2, 3),
+						", New R2 = ", round(R2.g2.1[subj[i]], 3),
+						"\n\t Old AR1 = ", as.logical(old.cor),
+						", New AR1 = ", as.logical(cor.2[subj[i]]),
+						"\n")
+      }
 		}
 	}
 	

@@ -8,8 +8,8 @@
 
 \usage{
 doubleGauss.fit(data, col, concave = TRUE, diffs = FALSE,
-	rho.0 = 0.9, cor = TRUE, cores = 1)
-logistic.fit(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, cores = 1)
+	rho.0 = 0.9, cor = TRUE, cores = 1, verbose = TRUE)
+logistic.fit(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, cores = 1, verbose = TRUE)
 }
 
 \arguments{
@@ -24,6 +24,7 @@ logistic.fit(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, cores = 1)
   \item{rho.0}{ numeric (Between 0 and 1). Assumed autocorrelation of errors for individual subject's curve}
   \item{cor}{ boolean. If TRUE assumes an AR1 autocorrelation structure among the residuals for fitting }
   \item{cores}{integer. Number of cores on the localhost to use}
+  \item{verbose}{boolean. Whether to include estimates for each curve}
 }
 \details{ Fit Subjects from 2 groups with the 6-parameter Double Gaussian or the 4-parameter Logistic}
 

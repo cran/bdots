@@ -130,9 +130,9 @@ ests.plot(ci.2.out.1)
 ###################################################
 ### code chunk number 13: bdots.Rnw:259-265
 ###################################################
-ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
-	subj = c(13, 23),
-	group = c(2, 2),
+ci.2.out.1 <- doubleGauss.refit(ci.2.out.1,
+	subj = c(30, 83),
+	group = c("CI", "CI"),
 	curves = c(2, 2),
 	params = list(c(650, 0.15, 150, 100, 0, 0.03),
 		c(700, 0.10, 150, 100, 0, 0.01)))
@@ -142,8 +142,8 @@ ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
 ### code chunk number 14: bdots.Rnw:273-279
 ###################################################
 refit.matrix <- matrix(NA, nrow = 2, ncol = 9)
-refit.matrix[1,] <- c(13, 2, 2, 650, 0.15, 150, 100, 0, 0.03)
-refit.matrix[2,] <- c(23, 2, 2, 700, 0.10, 150, 100, 0, 0.01)
+refit.matrix[1,] <- c(30, "CI", 2, 650, 0.15, 150, 100, 0, 0.03)
+refit.matrix[2,] <- c(83, "CI", 2, 700, 0.10, 150, 100, 0, 0.01)
 refit.matrix
 ci.2.out.1 <- doubleGauss.refit(ci.2.out.1, cor = FALSE,
 	info.matrix = refit.matrix)
@@ -153,8 +153,8 @@ ci.2.out.1 <- doubleGauss.refit(ci.2.out.1, cor = FALSE,
 ### code chunk number 15: bdots.Rnw:282-287
 ###################################################
 ci.2.out.1 <- doubleGauss.refit(ci.2.out.1 ,
-	subj = c(13, 23),
-	group = c(2, 2),
+	subj = c(30, 83),
+	group = c("CI", "CI"),
 	curves = c(2, 2),
 	cor = c(FALSE, FALSE))
 

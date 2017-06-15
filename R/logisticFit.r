@@ -1,4 +1,4 @@
-logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, cores = 1) {
+logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, cores = 1, verbose = TRUE) {
 	#Check that all required columns are included
 	if(!("Subject"  %in% names(data))) 				stop("data needs to include a 'Subject' column")
 	if(!("Time"     %in% names(data))) 				stop("data needs to include a 'Time' column")
@@ -109,8 +109,10 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 				SSE <- sum(y.err ^ 2)
 				R2.g1.1[id] <- 1 - SSE / SSY
 				
-				print(paste0("Group = ", groups[1], ", ID = ", id, ", Subject = ", id.nums.g1[id],
-											", Curve = 1, R2 = ", round(R2.g1.1[id], 3), ", AR1 = ", as.logical(cor.1[id])))
+        if(verbose) {
+          print(paste0("Group = ", groups[1], ", Subject = ", id.nums.g1[id],
+                        ", Curve = 1, R2 = ", round(R2.g1.1[id], 3), ", AR1 = ", as.logical(cor.1[id])))
+        }
 			}
 			
 			if(diffs) {
@@ -141,8 +143,10 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 					SSE <- sum(y.err ^ 2)
 					R2.g1.2[id] <- 1 - SSE / SSY
 					
-					print(paste0("Group = ", groups[1], ", ID = ", id, ", Subject = ", id.nums.g1[id],
-												", Curve = 2, R2 = ", round(R2.g1.2[id], 3), ", AR1 = ", as.logical(cor.3[id])))
+          if(verbose) {
+            print(paste0("Group = ", groups[1], ", Subject = ", id.nums.g1[id],
+                          ", Curve = 2, R2 = ", round(R2.g1.2[id], 3), ", AR1 = ", as.logical(cor.3[id])))
+          }
 				}
 			}
 		}
@@ -179,8 +183,10 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 				SSE <- sum(y.err ^ 2)
 				R2.g2.1[id] <- 1 - SSE / SSY
 				
-				print(paste0("Group = ", groups[2], ", ID = ", id, ", Subject = ", id.nums.g2[id],
-											", Curve = 1, R2 = ", round(R2.g2.1[id], 3), ", AR1 = ", as.logical(cor.2[id])))
+        if(verbose) {
+          print(paste0("Group = ", groups[2], ", Subject = ", id.nums.g2[id],
+                        ", Curve = 1, R2 = ", round(R2.g2.1[id], 3), ", AR1 = ", as.logical(cor.2[id])))
+        }
 			}
 			
 			if(diffs) {
@@ -211,8 +217,10 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 					SSE <- sum(y.err ^ 2)
 					R2.g2.2[id] <- 1 - SSE / SSY
 					
-					print(paste0("Group = ", groups[2], ", ID = ", id, ", Subject = ", id.nums.g2[id],
-												", Curve = 2, R2 = ", round(R2.g2.2[id], 3), ", AR1 = ", as.logical(cor.4[id])))
+          if(verbose) {
+            print(paste0("Group = ", groups[2], ", Subject = ", id.nums.g2[id],
+                          ", Curve = 2, R2 = ", round(R2.g2.2[id], 3), ", AR1 = ", as.logical(cor.4[id])))
+          }
 				}
 			}
 		}
@@ -437,16 +445,16 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 	
 	cat("Next Steps: Check goodness of fits (ests.plot, subs.plot),\n\trefit bad fits (logistic.refit),\n\tbootstrap and t-test (logistic.boot)\n\n")
 	
-	names(cor.1) <- 1:length(cor.1)
-	names(cor.2) <- 1:length(cor.2)
-	names(R2.g1.1) <- 1:length(R2.g1.1)
-	names(R2.g2.1) <- 1:length(R2.g2.1)
-	if(diffs) {
-		names(cor.3) <- 1:length(cor.3)
-		names(cor.4) <- 1:length(cor.4)
-		names(R2.g1.2) <- 1:length(R2.g1.2)
-		names(R2.g2.2) <- 1:length(R2.g2.2)
-	}
+	#names(cor.1) <- 1:length(cor.1)
+	#names(cor.2) <- 1:length(cor.2)
+	#names(R2.g1.1) <- 1:length(R2.g1.1)
+	#names(R2.g2.1) <- 1:length(R2.g2.1)
+	#if(diffs) {
+	#	names(cor.3) <- 1:length(cor.3)
+	#	names(cor.4) <- 1:length(cor.4)
+	#	names(R2.g1.2) <- 1:length(R2.g1.2)
+	#	names(R2.g2.2) <- 1:length(R2.g2.2)
+	#}
 	
 	list(data = data, col = col, rho.0 = rho.0, N.time = N.time, N.sub1 = N.sub1, N.sub2 = N.sub2,
     coef.id1 = coef.id1, coef.id2 = coef.id2, coef.id3 = coef.id3, coef.id4 = coef.id4,
