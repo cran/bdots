@@ -9,9 +9,9 @@
 
 \usage{
 doubleGauss.refit(part1.list, subj = NULL, group = NULL, curves = NULL,
-	params = NULL, cor=NULL, rho.0 = NULL, info.matrix = NULL)
+	params = NULL, cor=NULL, rho.0 = NULL, info.matrix = NULL, get.cov.only = FALSE)
 logistic.refit(part1.list, subj = NULL, group = NULL, curves = NULL,
-	params = NULL, cor = NULL, rho.0 = NULL, info.matrix = NULL)
+	params = NULL, cor = NULL, rho.0 = NULL, info.matrix = NULL, get.cov.only = FALSE)
 }
 
 \arguments{
@@ -28,6 +28,8 @@ logistic.refit(part1.list, subj = NULL, group = NULL, curves = NULL,
   \item{info.matrix}{numeric matrix. Can put subj/group/curves/params information here for convenience.
 	Columns should have the following order: subj, group, curves, params. This matrix cannot contain any
 	NA/NaN values. If diffs=FALSE, this information is not used -- simply use filler values.}
+  \item{get.cov.only}{logical. If TRUE, calculates covariance matrix at given parameter estimates. Does not
+    perform any parameter fitting}
 }
 \details{ Refit Subjects from 2 groups with the 6-parameter Double Gaussian or the 4-parameter Logistic.
 	Can specify starting parameters}

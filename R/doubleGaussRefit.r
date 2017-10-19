@@ -1,5 +1,5 @@
 doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
-	params = NULL, cor = NULL, rho.0 = NULL, info.matrix = NULL) {
+	params = NULL, cor = NULL, rho.0 = NULL, info.matrix = NULL, get.cov.only = FALSE) {
 	
 	#info.matrix:
 	#	1st column: subject #
@@ -11,6 +11,7 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 	# 7th column: params -- sigma2
 	# 8th column: params -- base1
 	# 9th column: params -- base2
+	# 10th column: rho.0, if column is available
 	if(!is.null(info.matrix)) {
 		if(any(is.na(info.matrix))) stop("Can't have any NA or NaN values in info.matrix")
 		if(!is.matrix(info.matrix)) stop("info.matrix should be a matrix")
@@ -25,6 +26,7 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 		for(i in 1:nrow(info.matrix)) {
 			params[[i]] <- as.numeric(info.matrix[i, 4:9])
 		}
+		if(ncol(info.matrix) == 10) rho.0 <- as.numeric(info.matrix[,10])
 	}
 	
 	if(length(subj) == 0 || length(group) == 0) stop("Need entry for 'subj' and 'group'")
@@ -55,6 +57,7 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 	time.all <- part1.list$time.all
 	y.fix <- part1.list$y.fix
 	if(is.null(rho.0)) rho.0 <- part1.list$rho.0
+	if(length(rho.0) == 1) rho.0 <- rep(rho.0, length(subj))
 	
 	coef.id1 <- part1.list$coef.id1
 	sdev.id1 <- part1.list$sdev.id1
@@ -109,7 +112,7 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 			
 			y.fix <- y1id[,col]
 			
-			fit.curve <- est.dgauss.curve(time.all, y.fix, rho.0, concave[1], params = params[[i]], cor = cor[i])
+			fit.curve <- est.dgauss.curve(time.all, y.fix, rho.0[i], concave[1], params = params[[i]], cor = cor[i], get.cov.only = get.cov.only)
 			
 			if(diffs && curves[i] == 2) {
 				old.R2 <- R2.g1.2[subj[i]]
@@ -185,7 +188,7 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 			
 			y.fix <- y1id[,col]
 			
-			fit.curve <- est.dgauss.curve(time.all, y.fix, rho.0, concave[2], params = params[[i]], cor = cor[i])
+			fit.curve <- est.dgauss.curve(time.all, y.fix, rho.0[i], concave[2], params = params[[i]], cor = cor[i], get.cov.only = get.cov.only)
 				
 			if(diffs && curves[i] == 2) {
 				old.R2 <- R2.g2.2[subj[i]]

@@ -1,5 +1,5 @@
 logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
-	params = NULL, cor = NULL, rho.0 = NULL, info.matrix = NULL) {
+	params = NULL, cor = NULL, rho.0 = NULL, info.matrix = NULL, get.cov.only = FALSE) {
 	
 	#info.matrix:
 	#	1st column: subject #
@@ -9,6 +9,7 @@ logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
 	# 5th column: params -- peak
 	# 6th column: params -- slope
 	# 7th column: params -- cross
+	# 8th column: rho.0, if column is available
 	if(!is.null(info.matrix)) {
 		if(any(is.na(info.matrix))) stop("Can't have any NA or NaN values in info.matrix")
 		if(!is.matrix(info.matrix)) stop("info.matrix should be a matrix")
@@ -23,6 +24,7 @@ logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
 		for(i in 1:nrow(info.matrix)) {
 			params[[i]] <- as.numeric(info.matrix[i, 4:7])
 		}
+		if(ncol(info.matrix) == 8) rho.0 <- as.numeric(info.matrix[,8])
 	}
 	
 	if(length(subj) == 0 || length(group) == 0) stop("Need entry for 'subj' and 'group'")
@@ -52,6 +54,7 @@ logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
 	time.all <- part1.list$time.all
 	y.fix <- part1.list$y.fix
 	if(is.null(rho.0)) rho.0 <- part1.list$rho.0
+	if(length(rho.0) == 1) rho.0 <- rep(rho.0, length(subj))
 	
 	coef.id1 <- part1.list$coef.id1
 	sdev.id1 <- part1.list$sdev.id1
@@ -101,7 +104,7 @@ logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
 			
 			y.fix <- y1id[,col]
 
-			fit.curve <- est.logistic.curve(time.all, y.fix, rho.0, params = params[[i]], cor = cor[i])
+			fit.curve <- est.logistic.curve(time.all, y.fix, rho.0, params = params[[i]], cor = cor[i], get.cov.only = get.cov.only)
 				
 			if(diffs && curves[i] == 2) {
 				old.R2 <- R2.g1.2[subj[i]]
@@ -175,7 +178,7 @@ logistic.refit <- function(part1.list, subj = NULL, group = NULL, curves = NULL,
 			}
 
 			y.fix <- y1id[,col]
-			fit.curve <- est.logistic.curve(time.all, y.fix, rho.0, params = params[[i]], cor = cor[i])
+			fit.curve <- est.logistic.curve(time.all, y.fix, rho.0, params = params[[i]], cor = cor[i], get.cov.only = get.cov.only)
 				
 			if(diffs && curves[i] == 2) {
 				old.R2 <- R2.g2.2[subj[i]]

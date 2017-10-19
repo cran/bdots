@@ -1,4 +1,4 @@
-est.dgauss.curve <- function(time, fixations, rho, conc, params = NULL, cor = TRUE) {
+est.dgauss.curve <- function(time, fixations, rho, conc, params = NULL, cor = TRUE, get.cov.only = FALSE) {
 	if(is.null(params)) {
 		mu    <- find.mu(time, fixations, conc)
 		ht    <- find.ht(time, fixations, conc)
@@ -14,19 +14,30 @@ est.dgauss.curve <- function(time, fixations, rho, conc, params = NULL, cor = TR
 		base1 <- params[5]
 		base2 <- params[6]
 	}
-	if(cor) {
-		fit.curve <- tryCatch(gnls(fixations ~ (time < mu) * (exp(-1 * (time - mu) ^ 2
-												/ (2 * sig1 ^ 2)) * (ht - base1) + base1) + (mu <= time) * (exp(-1 * (time - mu) ^ 2 /
-												(2 * sig2 ^ 2)) * (ht - base2) + base2), 
-											start=c(mu = mu, ht = ht, sig1 = sig1, sig2 = sig2, base1 = base1, base2 = base2),
-											correlation=corAR1(rho)), error = function(e) NULL)
-		if(is.null(fit.curve)) cor <- FALSE
-	}
-	if(!cor) {
-		fit.curve <- tryCatch(gnls(fixations ~ (time < mu) * (exp(-1 * (time - mu) ^ 2
-												/ (2 * sig1 ^ 2)) * (ht - base1) + base1) + (mu <= time) * (exp(-1 * (time - mu) ^ 2 /
-												(2 * sig2 ^ 2)) * (ht - base2) + base2), 
-											start=c(mu = mu, ht = ht, sig1 = sig1, sig2 = sig2, base1 = base1, base2 = base2)), error = function(e) NULL)
+	
+	if(get.cov.only) {
+		fit.curve <- gnls(fixations ~ (time < mu) * (exp(-1 * (time - mu) ^ 2
+													/ (2 * sig1 ^ 2)) * (ht - base1) + base1) + (mu <= time) * (exp(-1 * (time - mu) ^ 2 /
+													(2 * sig2 ^ 2)) * (ht - base2) + base2), 
+												start=c(mu = mu, ht = ht, sig1 = sig1, sig2 = sig2, base1 = base1, base2 = base2),
+												correlation=corAR1(rho),
+												control = gnlsControl(maxIter = 0, nlsMaxIter = 0, msMaxIter = 0, returnObject = TRUE))
+		cor <- TRUE
+	} else {
+		if(cor) {
+			fit.curve <- tryCatch(gnls(fixations ~ (time < mu) * (exp(-1 * (time - mu) ^ 2
+													/ (2 * sig1 ^ 2)) * (ht - base1) + base1) + (mu <= time) * (exp(-1 * (time - mu) ^ 2 /
+													(2 * sig2 ^ 2)) * (ht - base2) + base2), 
+												start=c(mu = mu, ht = ht, sig1 = sig1, sig2 = sig2, base1 = base1, base2 = base2),
+												correlation=corAR1(rho)), error = function(e) NULL)
+			if(is.null(fit.curve)) cor <- FALSE
+		}
+		if(!cor) {
+			fit.curve <- tryCatch(gnls(fixations ~ (time < mu) * (exp(-1 * (time - mu) ^ 2
+													/ (2 * sig1 ^ 2)) * (ht - base1) + base1) + (mu <= time) * (exp(-1 * (time - mu) ^ 2 /
+													(2 * sig2 ^ 2)) * (ht - base2) + base2), 
+												start=c(mu = mu, ht = ht, sig1 = sig1, sig2 = sig2, base1 = base1, base2 = base2)), error = function(e) NULL)
+		}
 	}
 	list(fit = fit.curve, cor = cor)
 }

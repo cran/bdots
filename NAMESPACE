@@ -9,10 +9,11 @@ export(doubleGauss.boot,
 		replot,
 		subs.delete,
 		bdots.write.csv,
-		printFits)
+		printFits,
+		tsmultcomp)
 
 import(parallel, doParallel, doRNG, foreach)
-importFrom("nlme", "gnls", "corAR1")
+importFrom("nlme", "gnls", "corAR1", "gnlsControl")
 importFrom("mvtnorm", "pmvnorm", "rmvnorm", "GenzBretz")
 importFrom("grDevices", "rgb")
 importFrom("graphics", "axis", "box", "hist", "legend", "lines", "par",
