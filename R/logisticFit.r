@@ -51,18 +51,22 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 	# Save parameter estimates
 	coef.id1 <-  matrix(NA, ncol = 4, nrow = N.sub1)
 	sdev.id1 <-  matrix(NA, ncol = 4, nrow = N.sub1)
+	sdev.id1.cov <- vector("list", N.sub1)
 	sigma.id1 <- matrix(NA, ncol = 1, nrow = N.sub1)
 
 	coef.id2 <-  matrix(NA, ncol = 4, nrow = N.sub2)
 	sdev.id2 <-  matrix(NA, ncol = 4, nrow = N.sub2)
+	sdev.id2.cov <- vector("list", N.sub2)
 	sigma.id2 <- matrix(NA, ncol = 1, nrow = N.sub2)
   
   coef.id3 <-  matrix(NA, ncol = 4, nrow = N.sub1)
 	sdev.id3 <-  matrix(NA, ncol = 4, nrow = N.sub1)
+	sdev.id3.cov <- vector("list", N.sub1)
 	sigma.id3 <- matrix(NA, ncol = 1, nrow = N.sub1)
   
   coef.id4 <-  matrix(NA, ncol = 4, nrow = N.sub2)
 	sdev.id4 <-  matrix(NA, ncol = 4, nrow = N.sub2)
+	sdev.id4.cov <- vector("list", N.sub2)
 	sigma.id4 <- matrix(NA, ncol = 1, nrow = N.sub2)
   
   curve.f <- function(mini,peak,slope,cross,t)
@@ -91,6 +95,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 			if(is.null(fit.curve$fit)) {
 				coef.id1[id,] <- rep(NA, 4)
 				sdev.id1[id,] <- rep(NA, 4)
+				sdev.id1.cov[[id]] <- matrix(NA, nrow = 4, ncol = 4)
 				sigma.id1[id,] <- NA
 				cor.1[id] <- NA
 				R2.g1.1[id] <- NA
@@ -100,6 +105,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 			
 				coef.id1[id,] <- coef(fit.curve)
 				sdev.id1[id,] <- sqrt(diag(fit.curve$varBeta))
+				sdev.id1.cov[[id]] <- fit.curve$varBeta
 				sigma.id1[id,] <- fit.curve$sigma
 						
 				SSY <- sum((y.fix - mean(y.fix)) ^ 2)
@@ -125,6 +131,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 				if(is.null(fit.curve$fit)) {
 					coef.id3[id,] <- rep(NA, 4)
 					sdev.id3[id,] <- rep(NA, 4)
+					sdev.id3.cov[[id]] <- matrix(NA, nrow = 4, ncol = 4)
 					sigma.id3[id,] <- NA
 					cor.3[id] <- NA
 					R2.g1.2[id] <- NA
@@ -134,6 +141,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 				
 					coef.id3[id,] <- coef(fit.curve)
 					sdev.id3[id,] <- sqrt(diag(fit.curve$varBeta))
+					sdev.id3.cov[[id]] <- fit.curve$varBeta
 					sigma.id3[id,] <- fit.curve$sigma
 					
 					SSY <- sum((y.fix - mean(y.fix)) ^ 2)
@@ -165,6 +173,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 			if(is.null(fit.curve$fit)) {
 				coef.id2[id,] <- rep(NA, 4)
 				sdev.id2[id,] <- rep(NA, 4)
+				sdev.id2.cov[[id]] <- matrix(NA, nrow = 4, ncol = 4)
 				sigma.id2[id,] <- NA
 				cor.2[id] <- NA
 				R2.g2.1[id] <- NA
@@ -174,6 +183,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 			
 				coef.id2[id,] <- coef(fit.curve)
 				sdev.id2[id,] <- sqrt(diag(fit.curve$varBeta))
+				sdev.id2.cov[[id]] <- fit.curve$varBeta
 				sigma.id2[id,] <- fit.curve$sigma
 						
 				SSY <- sum((y.fix - mean(y.fix)) ^ 2)
@@ -199,6 +209,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 				if(is.null(fit.curve$fit)) {
 					coef.id4[id,] <- rep(NA, 4)
 					sdev.id4[id,] <- rep(NA, 4)
+					sdev.id4.cov[[id]] <- matrix(NA, nrow = 4, ncol = 4)
 					sigma.id4[id,] <- NA
 					cor.4[id] <- NA
 					R2.g2.2[id] <- NA
@@ -208,6 +219,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 				
 					coef.id4[id,] <- coef(fit.curve)
 					sdev.id4[id,] <- sqrt(diag(fit.curve$varBeta))
+					sdev.id4.cov[[id]] <- fit.curve$varBeta
 					sigma.id4[id,] <- fit.curve$sigma
 							
 					SSY <- sum((y.fix - mean(y.fix)) ^ 2)
@@ -243,6 +255,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 			if(is.null(fit.curve$fit)) {
 				coef.1 <- rep(NA, 4)
 				sdev.1 <- rep(NA, 4)
+				sdev.1.cov <- matrix(NA, nrow = 4, ncol = 4)
 				sigma.1 <- NA
 				cor.temp.1 <- NA
 				R2.1 <- NA
@@ -252,6 +265,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 			
 				coef.1 <- coef(fit.curve)
 				sdev.1 <- sqrt(diag(fit.curve$varBeta))
+				sdev.1.cov <- fit.curve$varBeta
 				sigma.1 <- fit.curve$sigma
 						
 				SSY <- sum((y.fix - mean(y.fix)) ^ 2)
@@ -272,6 +286,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 				if(is.null(fit.curve$fit)) {
 					coef.2 <- rep(NA, 4)
 					sdev.2 <- rep(NA, 4)
+					sdev.2.cov <- matrix(NA, nrow = 4, ncol = 4)
 					sigma.2 <- NA
 					cor.temp.2 <- NA
 					R2.2 <- NA
@@ -281,6 +296,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 				
 					coef.2 <- coef(fit.curve)
 					sdev.2 <- sqrt(diag(fit.curve$varBeta))
+					sdev.2.cov <- fit.curve$varBeta
 					sigma.2 <- fit.curve$sigma
 							
 					SSY <- sum((y.fix - mean(y.fix)) ^ 2)
@@ -293,24 +309,44 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 			}
 			
 			if(diffs) {
-				out <- c(coef.1, sdev.1, sigma.1, R2.1, cor.temp.1, coef.2, sdev.2, sigma.2, R2.2, cor.temp.2)
+				out <- c(coef.1, sdev.1.cov[lower.tri(sdev.1.cov, diag = TRUE)], sigma.1, R2.1, cor.temp.1,
+					coef.2, sdev.2.cov[lower.tri(sdev.1.cov, diag = TRUE)], sigma.2, R2.2, cor.temp.2)
 			} else {
-				out <- c(coef.1, sdev.1, sigma.1, R2.1, cor.temp.1)
+				out <- c(coef.1, sdev.1.cov[lower.tri(sdev.1.cov, diag = TRUE)], sigma.1, R2.1, cor.temp.1)
 			}
 			out
 		}
 
 		coef.id1 <- for.out[,1:4]
-		sdev.id1 <- for.out[,5:8]
-		sigma.id1[,1] <- as.numeric(for.out[,9])
-		R2.g1.1 <- as.numeric(for.out[,10])
-		cor.1 <- as.numeric(for.out[,11])
+		sdev.id1 <- for.out[,5:14]
+		sigma.id1[,1] <- as.numeric(for.out[,15])
+		R2.g1.1 <- as.numeric(for.out[,16])
+		cor.1 <- as.numeric(for.out[,17])
 		if(diffs) {
-			coef.id3 <- for.out[,12:15]
-			sdev.id3 <- for.out[,16:19]
-			sigma.id3[,1] <- as.numeric(for.out[,20])
-			R2.g1.2 <- as.numeric(for.out[,21])
-			cor.3 <- as.numeric(for.out[,22])
+			coef.id3 <- for.out[,18:21]
+			sdev.id3 <- for.out[,22:31]
+			sigma.id3[,1] <- as.numeric(for.out[,32])
+			R2.g1.2 <- as.numeric(for.out[,33])
+			cor.3 <- as.numeric(for.out[,34])
+		}
+		
+		# sdev.id1 passed as a vector. Recreate covariance matrix.
+		sdev.id1.cov <- lapply(split(sdev.id1, seq(nrow(sdev.id1))), function(x) {
+			mat <- matrix(NA, ncol = 4, nrow = 4)
+			mat[lower.tri(mat, diag = TRUE)] <- x
+			mat[upper.tri(mat, diag = FALSE)] <- t(mat)[upper.tri(mat, diag = FALSE)]
+			mat
+		} )
+		sdev.id1 <- vapply(sdev.id1.cov, function(x) sqrt(diag(x)), numeric(4))
+		
+		if(diffs) {
+			sdev.id3.cov <- lapply(split(sdev.id3, seq(nrow(sdev.id3))), function(x) {
+				mat <- matrix(NA, ncol = 4, nrow = 4)
+				mat[lower.tri(mat, diag = TRUE)] <- x
+				mat[upper.tri(mat, diag = FALSE)] <- t(mat)[upper.tri(mat, diag = FALSE)]
+				mat
+			} )
+			sdev.id3 <- vapply(sdev.id3.cov, function(x) sqrt(diag(x)), numeric(4))
 		}
 		
 		for.out <- foreach(id = 1:N.g2, .combine = rbind) %dopar% {
@@ -327,6 +363,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 			if(is.null(fit.curve$fit)) {
 				coef.1 <- rep(NA, 4)
 				sdev.1 <- rep(NA, 4)
+				sdev.1.cov <- matrix(NA, nrow = 4, ncol = 4)
 				sigma.1 <- NA
 				cor.temp.1 <- NA
 				R2.1 <- NA
@@ -336,6 +373,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 			
 				coef.1 <- coef(fit.curve)
 				sdev.1 <- sqrt(diag(fit.curve$varBeta))
+				sdev.1.cov <- fit.curve$varBeta
 				sigma.1 <- fit.curve$sigma
 						
 				SSY <- sum((y.fix - mean(y.fix)) ^ 2)
@@ -356,6 +394,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 				if(is.null(fit.curve$fit)) {
 					coef.2 <- rep(NA, 4)
 					sdev.2 <- rep(NA, 4)
+					sdev.2.cov <- matrix(NA, nrow = 4, ncol = 4)
 					sigma.2 <- NA
 					cor.temp.2 <- NA
 					R2.2 <- NA
@@ -365,6 +404,7 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 				
 					coef.2 <- coef(fit.curve)
 					sdev.2 <- sqrt(diag(fit.curve$varBeta))
+					sdev.2.cov <- fit.curve$varBeta
 					sigma.2 <- fit.curve$sigma
 							
 					SSY <- sum((y.fix - mean(y.fix)) ^ 2)
@@ -377,24 +417,44 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
 			}
 			
 			if(diffs) {
-				out <- c(coef.1, sdev.1, sigma.1, R2.1, cor.temp.1, coef.2, sdev.2, sigma.2, R2.2, cor.temp.2)
+				out <- c(coef.1, sdev.1.cov[lower.tri(sdev.1.cov, diag = TRUE)], sigma.1, R2.1, cor.temp.1,
+					coef.2, sdev.2.cov[lower.tri(sdev.1.cov, diag = TRUE)], sigma.2, R2.2, cor.temp.2)
 			} else {
-				out <- c(coef.1, sdev.1, sigma.1, R2.1, cor.temp.1)
+				out <- c(coef.1, sdev.1.cov[lower.tri(sdev.1.cov, diag = TRUE)], sigma.1, R2.1, cor.temp.1)
 			}
 			out
 		}
 		
 		coef.id2 <- for.out[,1:4]
-		sdev.id2 <- for.out[,5:8]
-		sigma.id2[,1] <- as.numeric(for.out[,9])
-		R2.g2.1 <- as.numeric(for.out[,10])
-		cor.2 <- as.numeric(for.out[,11])
+		sdev.id2 <- for.out[,5:14]
+		sigma.id2[,1] <- as.numeric(for.out[,15])
+		R2.g2.1 <- as.numeric(for.out[,16])
+		cor.2 <- as.numeric(for.out[,17])
 		if(diffs) {
-			coef.id4 <- for.out[,12:15]
-			sdev.id4 <- for.out[,16:19]
-			sigma.id4[,1] <- as.numeric(for.out[,20])
-			R2.g2.2 <- as.numeric(for.out[,21])
-			cor.4 <- as.numeric(for.out[,22])
+			coef.id4 <- for.out[,18:21]
+			sdev.id4 <- for.out[,22:31]
+			sigma.id4[,1] <- as.numeric(for.out[,32])
+			R2.g2.2 <- as.numeric(for.out[,33])
+			cor.4 <- as.numeric(for.out[,34])
+		}
+		
+		# sdev.id1 passed as a vector. Recreate covariance matrix.
+		sdev.id2.cov <- lapply(split(sdev.id2, seq(nrow(sdev.id2))), function(x) {
+			mat <- matrix(NA, ncol = 4, nrow = 4)
+			mat[lower.tri(mat, diag = TRUE)] <- x
+			mat[upper.tri(mat, diag = FALSE)] <- t(mat)[upper.tri(mat, diag = FALSE)]
+			mat
+		} )
+		sdev.id2 <- vapply(sdev.id2.cov, function(x) sqrt(diag(x)), numeric(4))
+		
+		if(diffs) {
+			sdev.id4.cov <- lapply(split(sdev.id4, seq(nrow(sdev.id4))), function(x) {
+				mat <- matrix(NA, ncol = 4, nrow = 4)
+				mat[lower.tri(mat, diag = TRUE)] <- x
+				mat[upper.tri(mat, diag = FALSE)] <- t(mat)[upper.tri(mat, diag = FALSE)]
+				mat
+			} )
+			sdev.id4 <- vapply(sdev.id4.cov, function(x) sqrt(diag(x)), numeric(4))
 		}
 		
 		stopCluster(cl)
@@ -463,5 +523,6 @@ logistic.fit <- function(data, col, diffs = FALSE, rho.0 = 0.9, cor = TRUE, core
     id.nums.g1 = id.nums.g1, id.nums.g2 = id.nums.g2,
     groups = groups, time.all = time.all, N.g1 = N.g1, N.g2 = N.g2, model = "logistic",
     diffs = diffs, cor = cor, cor.1 = cor.1, cor.2 = cor.2, cor.3 = cor.3, cor.4 = cor.4,
-		R2.g1.1 = R2.g1.1, R2.g1.2 = R2.g1.2, R2.g2.1 = R2.g2.1, R2.g2.2 = R2.g2.2)
+		R2.g1.1 = R2.g1.1, R2.g1.2 = R2.g1.2, R2.g2.1 = R2.g2.1, R2.g2.2 = R2.g2.2,
+		sdev.id1.cov = sdev.id1.cov, sdev.id2.cov = sdev.id2.cov, sdev.id3.cov = sdev.id3.cov, sdev.id4.cov = sdev.id4.cov)
 }

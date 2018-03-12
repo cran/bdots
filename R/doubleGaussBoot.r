@@ -7,10 +7,10 @@ doubleGauss.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired
   coef.id2   <- part1.list$coef.id2
 	coef.id3   <- part1.list$coef.id3
   coef.id4   <- part1.list$coef.id4
-  sdev.id1   <- part1.list$sdev.id1
-  sdev.id2   <- part1.list$sdev.id2
-	sdev.id3   <- part1.list$sdev.id3
-  sdev.id4   <- part1.list$sdev.id4
+	sdev.id1.cov   <- part1.list$sdev.id1.cov
+	sdev.id2.cov   <- part1.list$sdev.id2.cov
+	sdev.id3.cov   <- part1.list$sdev.id3.cov
+	sdev.id4.cov   <- part1.list$sdev.id4.cov
   sigma.id1  <- part1.list$sigma.id1
   sigma.id2  <- part1.list$sigma.id2
 	sigma.id3  <- part1.list$sigma.id3
@@ -40,10 +40,10 @@ doubleGauss.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired
 	coef.id2 <- subset(coef.id2, !group2.bad)
 	coef.id4 <- subset(coef.id4, !group2.bad)
 	
-	sdev.id1 <- subset(sdev.id1, !group1.bad)
-	sdev.id3 <- subset(sdev.id3, !group1.bad)
-	sdev.id2 <- subset(sdev.id2, !group2.bad)
-	sdev.id4 <- subset(sdev.id4, !group2.bad)
+	sdev.id1.cov <- subset(sdev.id1.cov, !group1.bad)
+	if(diffs) sdev.id3.cov <- subset(sdev.id3.cov, !group1.bad)
+	sdev.id2.cov <- subset(sdev.id2.cov, !group2.bad)
+	if(diffs) sdev.id4.cov <- subset(sdev.id4.cov, !group2.bad)
 	
 	sigma.id1 <- subset(sigma.id1, !group1.bad)
 	sigma.id3 <- subset(sigma.id3, !group1.bad)
@@ -74,6 +74,8 @@ doubleGauss.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired
 	curve1.mat <- matrix(NA, ncol = N.time, nrow = N.iter)
 	curve2.mat <- matrix(NA, ncol = N.time, nrow = N.iter)
 	curve3.mat <- matrix(NA, ncol = N.time, nrow = N.iter)
+	
+	if(paired && N.g1 != N.g2) stop("Can't do paired test for different group sizes")
   
   #Target Curve
 	curve.f <- function(mu, ht, sig1, sig2, base1, base2, x){
@@ -87,184 +89,136 @@ doubleGauss.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired
 	
 	mu.1 <- ht.1 <- s1.1 <- s2.1 <- b1.1 <- b2.1 <-
 		mu.2 <- ht.2 <- s1.2 <- s2.2 <- b1.2 <- b2.2 <- numeric(N.iter)
+		
+	# Generate parameters
+	params.1 <- vector("list", N.g1)
+	params.2 <- vector("list", N.g2)
+	if(diffs) {
+		params.3 <- params.1
+		params.4 <- params.2
+	}
+	
+	if(paired) {
+		param.cor <- cor(coef.id1, coef.id2)
+		
+		for(i in 1:N.g1) {
+			sigma.11 <- sdev.id1.cov[[i]]
+			sigma.22 <- sdev.id2.cov[[i]]
+			sigma.12 <- param.cor * sqrt(t(t(diag(sigma.11))) %*% t(diag(sigma.22)))
+			sigma <- cbind(rbind(sigma.11, t(sigma.12)), rbind(sigma.12, sigma.22))
+			while(any(eigen(sigma)$values <= 0)) sigma <- as.matrix(nearPD(sigma, keepDiag = TRUE, maxit = 1e7)$mat)
+			
+			param.i <- rmvnorm(N.iter, c(coef.id1[i,], coef.id2[i,]), sigma)
+			params.1[[i]] <- param.i[,1:6]
+			params.2[[i]] <- param.i[,7:12]
+		}
+		
+		if(diffs) {
+			param.cor <- cor(coef.id3, coef.id4)
+			
+			for(i in 1:N.g1) {
+				sigma.11 <- sdev.id3.cov[[i]]
+				sigma.22 <- sdev.id4.cov[[i]]
+				sigma.12 <- param.cor * sqrt(t(t(diag(sigma.11))) %*% t(diag(sigma.22)))
+				sigma <- cbind(rbind(sigma.11, t(sigma.12)), rbind(sigma.12, sigma.22))
+				while(any(eigen(sigma)$values <= 0)) sigma <- as.matrix(nearPD(sigma, keepDiag = TRUE, maxit = 1e7)$mat)
+				
+				param.i <- rmvnorm(N.iter, c(coef.id1[i,], coef.id2[i,]), sigma)
+				params.3[[i]] <- param.i[,1:6]
+				params.4[[i]] <- param.i[,7:12]
+			}
+		}
+	} else {
+		for(i in 1:N.g1) {
+			params.1[[i]] <- rmvnorm(N.iter, coef.id1[i,], sdev.id1.cov[[i]])
+			if(diffs) params.3[[i]] <- rmvnorm(N.iter, coef.id3[i,], sdev.id3.cov[[i]])
+		}
+		for(i in 1:N.g2) {
+			params.2[[i]] <- rmvnorm(N.iter, coef.id2[i,], sdev.id2.cov[[i]])
+			if(diffs) params.4[[i]] <- rmvnorm(N.iter, coef.id4[i,], sdev.id4.cov[[i]])
+		}
+	}
 	
 	##################
 	##### 1 Core #####
 	##################
-	
-	if(paired) {
-		mu.cor.1 <- cor(coef.id1[,1], coef.id2[,1], use = "pairwise.complete.obs")
-		ht.cor.1 <- cor(coef.id1[,2], coef.id2[,2], use = "pairwise.complete.obs")
-		s1.cor.1 <- cor(coef.id1[,3], coef.id2[,3], use = "pairwise.complete.obs")
-		s2.cor.1 <- cor(coef.id1[,4], coef.id2[,4], use = "pairwise.complete.obs")
-		b1.cor.1 <- cor(coef.id1[,5], coef.id2[,5], use = "pairwise.complete.obs")
-		b2.cor.1 <- cor(coef.id1[,6], coef.id2[,6], use = "pairwise.complete.obs")
-		
-		if(diffs) {
-			mu.cor.2 <- cor(coef.id3[,1], coef.id4[,1], use = "pairwise.complete.obs")
-			ht.cor.2 <- cor(coef.id3[,2], coef.id4[,2], use = "pairwise.complete.obs")
-			s1.cor.2 <- cor(coef.id3[,3], coef.id4[,3], use = "pairwise.complete.obs")
-			s2.cor.2 <- cor(coef.id3[,4], coef.id4[,4], use = "pairwise.complete.obs")
-			b1.cor.2 <- cor(coef.id3[,5], coef.id4[,5], use = "pairwise.complete.obs")
-			b2.cor.2 <- cor(coef.id3[,6], coef.id4[,6], use = "pairwise.complete.obs")
-		}
-	}
-
 	if(cores == 1) {
 		set.seed(seed)
 		for(iter in 1:N.iter){
-			if(paired) {
-				for(i in 1:N.g1) {
-					mu <- rmvnorm(1, mean = c(coef.id1[i,1], coef.id2[i,1]),
-						sigma = matrix(c(sdev.id1[i,1] ^ 2,
-							mu.cor.1 * sdev.id1[i,1] * sdev.id2[i,1],
-							mu.cor.1 * sdev.id1[i,1] * sdev.id2[i,1],
-							sdev.id2[i,1] ^ 2), nrow = 2))
-					ht <- rmvnorm(1, mean = c(coef.id1[i,2], coef.id2[i,2]),
-						sigma = matrix(c(sdev.id1[i,2] ^ 2,
-							ht.cor.1 * sdev.id1[i,2] * sdev.id2[i,2],
-							ht.cor.1 * sdev.id1[i,2] * sdev.id2[i,2],
-							sdev.id2[i,2] ^ 2), nrow = 2))
-					s1 <- rmvnorm(1, mean = c(coef.id1[i,3], coef.id2[i,3]),
-						sigma = matrix(c(sdev.id1[i,3] ^ 2,
-							s1.cor.1 * sdev.id1[i,3] * sdev.id2[i,3],
-							s1.cor.1 * sdev.id1[i,3] * sdev.id2[i,3],
-							sdev.id2[i,3] ^ 2), nrow = 2))
-					s2 <- rmvnorm(1, mean = c(coef.id1[i,4], coef.id2[i,4]),
-						sigma = matrix(c(sdev.id1[i,4] ^ 2,
-							s2.cor.1 * sdev.id1[i,4] * sdev.id2[i,4],
-							s2.cor.1 * sdev.id1[i,4] * sdev.id2[i,4],
-							sdev.id2[i,4] ^ 2), nrow = 2))
-					b1 <- rmvnorm(1, mean = c(coef.id1[i,5], coef.id2[i,5]),
-						sigma = matrix(c(sdev.id1[i,5] ^ 2,
-							b1.cor.1 * sdev.id1[i,5] * sdev.id2[i,5],
-							b1.cor.1 * sdev.id1[i,5] * sdev.id2[i,5],
-							sdev.id2[i,5] ^ 2), nrow = 2))
-					b2 <- rmvnorm(1, mean = c(coef.id1[i,6], coef.id2[i,6]),
-						sigma = matrix(c(sdev.id1[i,6] ^ 2,
-							b2.cor.1 * sdev.id1[i,6] * sdev.id2[i,6],
-							b2.cor.1 * sdev.id1[i,6] * sdev.id2[i,6],
-							sdev.id2[i,6] ^ 2), nrow = 2))
-						
-					mu1.ran <- mu[1]; mu2.ran <- mu[2]
-					ht1.ran <- ht[1]; ht2.ran <- ht[2]
-					s11.ran <- s1[1]; s12.ran <- s1[2]
-					s21.ran <- s2[1]; s22.ran <- s2[2]
-					b11.ran <- b1[1]; b12.ran <- b1[2]
-					b21.ran <- b2[1]; b22.ran <- b2[2]
+				mu.1[iter] <- mean(vapply(params.1, function(x) x[iter, 1], numeric(1)))
+				ht.1[iter] <- mean(vapply(params.1, function(x) x[iter, 2], numeric(1)))
+				s1.1[iter] <- mean(vapply(params.1, function(x) x[iter, 3], numeric(1)))
+				s2.1[iter] <- mean(vapply(params.1, function(x) x[iter, 4], numeric(1)))
+				b1.1[iter] <- mean(vapply(params.1, function(x) x[iter, 5], numeric(1)))
+				b2.1[iter] <- mean(vapply(params.1, function(x) x[iter, 6], numeric(1)))
+
+				mu.2[iter] <- mean(vapply(params.1, function(x) x[iter, 1], numeric(1)))
+				ht.2[iter] <- mean(vapply(params.1, function(x) x[iter, 2], numeric(1)))
+				s1.2[iter] <- mean(vapply(params.1, function(x) x[iter, 3], numeric(1)))
+				s2.2[iter] <- mean(vapply(params.1, function(x) x[iter, 4], numeric(1)))
+				b1.2[iter] <- mean(vapply(params.1, function(x) x[iter, 5], numeric(1)))
+				b2.2[iter] <- mean(vapply(params.1, function(x) x[iter, 6], numeric(1)))
+				
+			if(diffs) {
+				for(id in 1:N.g1){ #Get fixation level for each g1 subject
+					curve1.0[id,] <- curve.f(params.1[[id]][iter, 1],
+																		params.1[[id]][iter, 2],
+																		params.1[[id]][iter, 3],
+																		params.1[[id]][iter, 4],
+																		params.1[[id]][iter, 5],
+																		params.1[[id]][iter, 6],
+																		time.all) -
+													 curve.f(params.3[[id]][iter, 1],
+																		params.3[[id]][iter, 2],
+																		params.3[[id]][iter, 3],
+																		params.3[[id]][iter, 4],
+																		params.3[[id]][iter, 5],
+																		params.3[[id]][iter, 6],
+																		time.all)
+				}
+				for(id in 1:N.g2){ #Get fixation level for each g2 subject
+					curve2.0[id,] <- curve.f(params.2[[id]][iter, 1],
+																		params.2[[id]][iter, 2],
+																		params.2[[id]][iter, 3],
+																		params.2[[id]][iter, 4],
+																		params.2[[id]][iter, 5],
+																		params.2[[id]][iter, 6],
+																		time.all) -
+													 curve.f(params.4[[id]][iter, 1],
+																		params.4[[id]][iter, 2],
+																		params.4[[id]][iter, 3],
+																		params.4[[id]][iter, 4],
+																		params.4[[id]][iter, 5],
+																		params.4[[id]][iter, 6],
+																		time.all)
 				}
 			} else {
-				mu1.ran <- rnorm(N.g1, coef.id1[,1], sdev.id1[,1])
-				ht1.ran <- rnorm(N.g1, coef.id1[,2], sdev.id1[,2])
-				s11.ran <- rnorm(N.g1, coef.id1[,3], sdev.id1[,3])
-				s21.ran <- rnorm(N.g1, coef.id1[,4], sdev.id1[,4])
-				b11.ran <- rnorm(N.g1, coef.id1[,5], sdev.id1[,5])
-				b21.ran <- rnorm(N.g1, coef.id1[,6], sdev.id1[,6])
-
-				mu2.ran <- rnorm(N.g2, coef.id2[,1], sdev.id2[,1])
-				ht2.ran <- rnorm(N.g2, coef.id2[,2], sdev.id2[,2])
-				s12.ran <- rnorm(N.g2, coef.id2[,3], sdev.id2[,3])
-				s22.ran <- rnorm(N.g2, coef.id2[,4], sdev.id2[,4])
-				b12.ran <- rnorm(N.g2, coef.id2[,5], sdev.id2[,5])
-				b22.ran <- rnorm(N.g2, coef.id2[,6], sdev.id2[,6])
-			}
-			
-			mu.1[iter] <- mean(mu1.ran); mu.2[iter] <- mean(mu2.ran)
-			ht.1[iter] <- mean(ht1.ran); ht.2[iter] <- mean(ht1.ran)
-			s1.1[iter] <- mean(s11.ran); s1.2[iter] <- mean(s12.ran)
-			s2.1[iter] <- mean(s21.ran); s2.2[iter] <- mean(s22.ran)
-			b1.1[iter] <- mean(b11.ran); b1.2[iter] <- mean(b12.ran)
-			b2.1[iter] <- mean(b21.ran); b2.2[iter] <- mean(b22.ran)
-			
-			if(diffs) {
-				if(paired) {
-					for(i in 1:N.g1) {
-						mu <- rmvnorm(1, mean = c(coef.id3[i,1], coef.id4[i,1]),
-							sigma = matrix(c(sdev.id3[i,1] ^ 2,
-								mu.cor.2 * sdev.id3[i,1] * sdev.id4[i,1],
-								mu.cor.2 * sdev.id3[i,1] * sdev.id4[i,1],
-								sdev.id4[i,1] ^ 2), nrow = 2))
-						ht <- rmvnorm(1, mean = c(coef.id3[i,2], coef.id4[i,2]),
-							sigma = matrix(c(sdev.id3[i,2] ^ 2,
-								ht.cor.2 * sdev.id3[i,2] * sdev.id4[i,2],
-								ht.cor.2 * sdev.id3[i,2] * sdev.id4[i,2],
-								sdev.id4[i,2] ^ 2), nrow = 2))
-						s1 <- rmvnorm(1, mean = c(coef.id3[i,3], coef.id4[i,3]),
-							sigma = matrix(c(sdev.id3[i,3] ^ 2,
-								s1.cor.2 * sdev.id3[i,3] * sdev.id4[i,3],
-								s1.cor.2 * sdev.id3[i,3] * sdev.id4[i,3],
-								sdev.id4[i,3] ^ 2), nrow = 2))
-						s2 <- rmvnorm(1, mean = c(coef.id3[i,4], coef.id4[i,4]),
-							sigma = matrix(c(sdev.id3[i,4] ^ 2,
-								s2.cor.2 * sdev.id3[i,4] * sdev.id4[i,4],
-								s2.cor.2 * sdev.id3[i,4] * sdev.id4[i,4],
-								sdev.id4[i,4] ^ 2), nrow = 2))
-						b1 <- rmvnorm(1, mean = c(coef.id3[i,5], coef.id4[i,5]),
-							sigma = matrix(c(sdev.id3[i,5] ^ 2,
-								b1.cor.2 * sdev.id3[i,5] * sdev.id4[i,5],
-								b1.cor.2 * sdev.id3[i,5] * sdev.id4[i,5],
-								sdev.id4[i,5] ^ 2), nrow = 2))
-						b2 <- rmvnorm(1, mean = c(coef.id3[i,6], coef.id4[i,6]),
-							sigma = matrix(c(sdev.id3[i,6] ^ 2,
-								b2.cor.2 * sdev.id3[i,6] * sdev.id4[i,6],
-								b2.cor.2 * sdev.id3[i,6] * sdev.id4[i,6],
-								sdev.id4[i,6] ^ 2), nrow = 2))
-							
-						mu3.ran <- mu[1]; mu4.ran <- mu[2]
-						ht3.ran <- ht[1]; ht4.ran <- ht[2]
-						s13.ran <- s1[1]; s14.ran <- s1[2]
-						s23.ran <- s2[1]; s24.ran <- s2[2]
-						b13.ran <- b1[1]; b14.ran <- b1[2]
-						b23.ran <- b2[1]; b24.ran <- b2[2]
-					}
-				} else {
-					mu3.ran <- rnorm(N.g1, coef.id3[,1], sdev.id3[,1])
-					ht3.ran <- rnorm(N.g1, coef.id3[,2], sdev.id3[,2])
-					s13.ran <- rnorm(N.g1, coef.id3[,3], sdev.id3[,3])
-					s23.ran <- rnorm(N.g1, coef.id3[,4], sdev.id3[,4])
-					b13.ran <- rnorm(N.g1, coef.id3[,5], sdev.id3[,5])
-					b23.ran <- rnorm(N.g1, coef.id3[,6], sdev.id3[,6])
-
-					mu4.ran <- rnorm(N.g2, coef.id4[,1], sdev.id4[,1])
-					ht4.ran <- rnorm(N.g2, coef.id4[,2], sdev.id4[,2])
-					s14.ran <- rnorm(N.g2, coef.id4[,3], sdev.id4[,3])
-					s24.ran <- rnorm(N.g2, coef.id4[,4], sdev.id4[,4])
-					b14.ran <- rnorm(N.g2, coef.id4[,5], sdev.id4[,5])
-					b24.ran <- rnorm(N.g2, coef.id4[,6], sdev.id4[,6])
+				for(id in 1:N.g1){ #Get fixation level for each g1 subject
+					curve1.0[id,] <- curve.f(params.1[[id]][iter, 1],
+																		params.1[[id]][iter, 2],
+																		params.1[[id]][iter, 3],
+																		params.1[[id]][iter, 4],
+																		params.1[[id]][iter, 5],
+																		params.1[[id]][iter, 6],
+																		time.all)
+				}
+				for(id in 1:N.g2){ #Get fixation level for each g2 subject
+					curve2.0[id,] <- curve.f(params.2[[id]][iter, 1],
+																		params.2[[id]][iter, 2],
+																		params.2[[id]][iter, 3],
+																		params.2[[id]][iter, 4],
+																		params.2[[id]][iter, 5],
+																		params.2[[id]][iter, 6],
+																		time.all)
 				}
 			}
 
-			if(diffs) {
-				for(id in 1:N.g1) { #Get fixation level for each group 1 subject
-					curve1.0[id,] <- curve.f(mu1.ran[id], ht1.ran[id], s11.ran[id], s21.ran[id],
-																		b11.ran[id], b21.ran[id], time.all) -
-													 curve.f(mu3.ran[id], ht3.ran[id], s13.ran[id], s23.ran[id],
-																		b13.ran[id], b23.ran[id], time.all)
-				}
-				for(id in 1:N.g2) { #Get fixation level for each group 2 subject
-					curve2.0[id,] <- curve.f(mu2.ran[id], ht2.ran[id], s12.ran[id], s22.ran[id],
-																		b12.ran[id], b22.ran[id], time.all) -
-													 curve.f(mu4.ran[id], ht4.ran[id], s14.ran[id], s24.ran[id],
-																		b14.ran[id], b24.ran[id], time.all)
-				}
-			} else {
-				for(id in 1:N.g1) { #Get fixation level for each group 1 subject
-					curve1.0[id,] <- curve.f(mu1.ran[id], ht1.ran[id], s11.ran[id], s21.ran[id],
-																		b11.ran[id], b21.ran[id], time.all)
-				}
-				for(id in 1:N.g2) { #Get fixation level for each group 2 subject
-					curve2.0[id,] <- curve.f(mu2.ran[id], ht2.ran[id], s12.ran[id], s22.ran[id],
-																		b12.ran[id], b22.ran[id], time.all)
-				}
-			}
-
-			curve1.mat[iter,] <- apply(curve1.0, 2, mean) #Mean fixations at each time point for group 1
-			curve2.mat[iter,] <- apply(curve2.0, 2, mean) #Mean fixations at each time point for group 2
+			curve1.mat[iter,] <- colMeans(curve1.0)
+			curve2.mat[iter,] <- colMeans(curve2.0)
 			
-			if(paired) curve3.mat[iter,] <- apply(curve2.0 - curve1.0, 2, mean)
+			if(paired) curve3.mat[iter,] <- curve2.mat[iter,] - curve1.mat[iter,]
 		}
 	} else {
-	
 	####################
 	##### 2+ Cores #####
 	####################
@@ -273,153 +227,76 @@ doubleGauss.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired
 		registerDoParallel(cl)
 		
 		for.out <- foreach(iter = 1:N.iter, .combine = rbind, .options.RNG = seed) %dorng% {
-			if(paired) {
-				for(i in 1:N.g1) {
-					mu <- rmvnorm(1, mean = c(coef.id1[i,1], coef.id2[i,1]),
-						sigma = matrix(c(sdev.id1[i,1] ^ 2,
-							mu.cor.1 * sdev.id1[i,1] * sdev.id2[i,1],
-							mu.cor.1 * sdev.id1[i,1] * sdev.id2[i,1],
-							sdev.id2[i,1] ^ 2), nrow = 2))
-					ht <- rmvnorm(1, mean = c(coef.id1[i,2], coef.id2[i,2]),
-						sigma = matrix(c(sdev.id1[i,2] ^ 2,
-							ht.cor.1 * sdev.id1[i,2] * sdev.id2[i,2],
-							ht.cor.1 * sdev.id1[i,2] * sdev.id2[i,2],
-							sdev.id2[i,2] ^ 2), nrow = 2))
-					s1 <- rmvnorm(1, mean = c(coef.id1[i,3], coef.id2[i,3]),
-						sigma = matrix(c(sdev.id1[i,3] ^ 2,
-							s1.cor.1 * sdev.id1[i,3] * sdev.id2[i,3],
-							s1.cor.1 * sdev.id1[i,3] * sdev.id2[i,3],
-							sdev.id2[i,3] ^ 2), nrow = 2))
-					s2 <- rmvnorm(1, mean = c(coef.id1[i,4], coef.id2[i,4]),
-						sigma = matrix(c(sdev.id1[i,4] ^ 2,
-							s2.cor.1 * sdev.id1[i,4] * sdev.id2[i,4],
-							s2.cor.1 * sdev.id1[i,4] * sdev.id2[i,4],
-							sdev.id2[i,4] ^ 2), nrow = 2))
-					b1 <- rmvnorm(1, mean = c(coef.id1[i,5], coef.id2[i,5]),
-						sigma = matrix(c(sdev.id1[i,5] ^ 2,
-							b1.cor.1 * sdev.id1[i,5] * sdev.id2[i,5],
-							b1.cor.1 * sdev.id1[i,5] * sdev.id2[i,5],
-							sdev.id2[i,5] ^ 2), nrow = 2))
-					b2 <- rmvnorm(1, mean = c(coef.id1[i,6], coef.id2[i,6]),
-						sigma = matrix(c(sdev.id1[i,6] ^ 2,
-							b2.cor.1 * sdev.id1[i,6] * sdev.id2[i,6],
-							b2.cor.1 * sdev.id1[i,6] * sdev.id2[i,6],
-							sdev.id2[i,6] ^ 2), nrow = 2))
-						
-					mu1.ran <- mu[1]; mu2.ran <- mu[2]
-					ht1.ran <- ht[1]; ht2.ran <- ht[2]
-					s11.ran <- s1[1]; s12.ran <- s1[2]
-					s21.ran <- s2[1]; s22.ran <- s2[2]
-					b11.ran <- b1[1]; b12.ran <- b1[2]
-					b21.ran <- b2[1]; b22.ran <- b2[2]
-				}
-			} else {
-				mu1.ran <- rnorm(N.g1, coef.id1[,1], sdev.id1[,1])
-				ht1.ran <- rnorm(N.g1, coef.id1[,2], sdev.id1[,2])
-				s11.ran <- rnorm(N.g1, coef.id1[,3], sdev.id1[,3])
-				s21.ran <- rnorm(N.g1, coef.id1[,4], sdev.id1[,4])
-				b11.ran <- rnorm(N.g1, coef.id1[,5], sdev.id1[,5])
-				b21.ran <- rnorm(N.g1, coef.id1[,6], sdev.id1[,6])
+			mu.temp.1 <- mean(vapply(params.1, function(x) x[iter, 1], numeric(1)))
+			ht.temp.1 <- mean(vapply(params.1, function(x) x[iter, 2], numeric(1)))
+			s1.temp.1 <- mean(vapply(params.1, function(x) x[iter, 3], numeric(1)))
+			s2.temp.1 <- mean(vapply(params.1, function(x) x[iter, 4], numeric(1)))
+			b1.temp.1 <- mean(vapply(params.1, function(x) x[iter, 5], numeric(1)))
+			b2.temp.1 <- mean(vapply(params.1, function(x) x[iter, 6], numeric(1)))
 
-				mu2.ran <- rnorm(N.g2, coef.id2[,1], sdev.id2[,1])
-				ht2.ran <- rnorm(N.g2, coef.id2[,2], sdev.id2[,2])
-				s12.ran <- rnorm(N.g2, coef.id2[,3], sdev.id2[,3])
-				s22.ran <- rnorm(N.g2, coef.id2[,4], sdev.id2[,4])
-				b12.ran <- rnorm(N.g2, coef.id2[,5], sdev.id2[,5])
-				b22.ran <- rnorm(N.g2, coef.id2[,6], sdev.id2[,6])
-			}
-			
-			mu.temp.1 <- mean(mu1.ran); mu.temp.2 <- mean(mu2.ran)
-			ht.temp.1 <- mean(ht1.ran); ht.temp.2 <- mean(ht1.ran)
-			s1.temp.1 <- mean(s11.ran); s1.temp.2 <- mean(s12.ran)
-			s2.temp.1 <- mean(s21.ran); s2.temp.2 <- mean(s22.ran)
-			b1.temp.1 <- mean(b11.ran); b1.temp.2 <- mean(b12.ran)
-			b2.temp.1 <- mean(b21.ran); b2.temp.2 <- mean(b22.ran)
+			mu.temp.2 <- mean(vapply(params.1, function(x) x[iter, 1], numeric(1)))
+			ht.temp.2 <- mean(vapply(params.1, function(x) x[iter, 2], numeric(1)))
+			s1.temp.2 <- mean(vapply(params.1, function(x) x[iter, 3], numeric(1)))
+			s2.temp.2 <- mean(vapply(params.1, function(x) x[iter, 4], numeric(1)))
+			b1.temp.2 <- mean(vapply(params.1, function(x) x[iter, 5], numeric(1)))
+			b2.temp.2 <- mean(vapply(params.1, function(x) x[iter, 6], numeric(1)))
 			
 			if(diffs) {
-				if(paired) {
-					for(i in 1:N.g1) {
-						mu <- rmvnorm(1, mean = c(coef.id3[i,1], coef.id4[i,1]),
-							sigma = matrix(c(sdev.id3[i,1] ^ 2,
-								mu.cor.2 * sdev.id3[i,1] * sdev.id4[i,1],
-								mu.cor.2 * sdev.id3[i,1] * sdev.id4[i,1],
-								sdev.id4[i,1] ^ 2), nrow = 2))
-						ht <- rmvnorm(1, mean = c(coef.id3[i,2], coef.id4[i,2]),
-							sigma = matrix(c(sdev.id3[i,2] ^ 2,
-								ht.cor.2 * sdev.id3[i,2] * sdev.id4[i,2],
-								ht.cor.2 * sdev.id3[i,2] * sdev.id4[i,2],
-								sdev.id4[i,2] ^ 2), nrow = 2))
-						s1 <- rmvnorm(1, mean = c(coef.id3[i,3], coef.id4[i,3]),
-							sigma = matrix(c(sdev.id3[i,3] ^ 2,
-								s1.cor.2 * sdev.id3[i,3] * sdev.id4[i,3],
-								s1.cor.2 * sdev.id3[i,3] * sdev.id4[i,3],
-								sdev.id4[i,3] ^ 2), nrow = 2))
-						s2 <- rmvnorm(1, mean = c(coef.id3[i,4], coef.id4[i,4]),
-							sigma = matrix(c(sdev.id3[i,4] ^ 2,
-								s2.cor.2 * sdev.id3[i,4] * sdev.id4[i,4],
-								s2.cor.2 * sdev.id3[i,4] * sdev.id4[i,4],
-								sdev.id4[i,4] ^ 2), nrow = 2))
-						b1 <- rmvnorm(1, mean = c(coef.id3[i,5], coef.id4[i,5]),
-							sigma = matrix(c(sdev.id3[i,5] ^ 2,
-								b1.cor.2 * sdev.id3[i,5] * sdev.id4[i,5],
-								b1.cor.2 * sdev.id3[i,5] * sdev.id4[i,5],
-								sdev.id4[i,5] ^ 2), nrow = 2))
-						b2 <- rmvnorm(1, mean = c(coef.id3[i,6], coef.id4[i,6]),
-							sigma = matrix(c(sdev.id3[i,6] ^ 2,
-								b2.cor.2 * sdev.id3[i,6] * sdev.id4[i,6],
-								b2.cor.2 * sdev.id3[i,6] * sdev.id4[i,6],
-								sdev.id4[i,6] ^ 2), nrow = 2))
-							
-						mu3.ran <- mu[1]; mu4.ran <- mu[2]
-						ht3.ran <- ht[1]; ht4.ran <- ht[2]
-						s13.ran <- s1[1]; s14.ran <- s1[2]
-						s23.ran <- s2[1]; s24.ran <- s2[2]
-						b13.ran <- b1[1]; b14.ran <- b1[2]
-						b23.ran <- b2[1]; b24.ran <- b2[2]
-					}
-				} else {
-					mu3.ran <- rnorm(N.g1, coef.id3[,1], sdev.id3[,1])
-					ht3.ran <- rnorm(N.g1, coef.id3[,2], sdev.id3[,2])
-					s13.ran <- rnorm(N.g1, coef.id3[,3], sdev.id3[,3])
-					s23.ran <- rnorm(N.g1, coef.id3[,4], sdev.id3[,4])
-					b13.ran <- rnorm(N.g1, coef.id3[,5], sdev.id3[,5])
-					b23.ran <- rnorm(N.g1, coef.id3[,6], sdev.id3[,6])
-
-					mu4.ran <- rnorm(N.g2, coef.id4[,1], sdev.id4[,1])
-					ht4.ran <- rnorm(N.g2, coef.id4[,2], sdev.id4[,2])
-					s14.ran <- rnorm(N.g2, coef.id4[,3], sdev.id4[,3])
-					s24.ran <- rnorm(N.g2, coef.id4[,4], sdev.id4[,4])
-					b14.ran <- rnorm(N.g2, coef.id4[,5], sdev.id4[,5])
-					b24.ran <- rnorm(N.g2, coef.id4[,6], sdev.id4[,6])
+				for(id in 1:N.g1){ #Get fixation level for each g1 subject
+					curve1.0[id,] <- curve.f(params.1[[id]][iter, 1],
+																		params.1[[id]][iter, 2],
+																		params.1[[id]][iter, 3],
+																		params.1[[id]][iter, 4],
+																		params.1[[id]][iter, 5],
+																		params.1[[id]][iter, 6],
+																		time.all) -
+													 curve.f(params.3[[id]][iter, 1],
+																		params.3[[id]][iter, 2],
+																		params.3[[id]][iter, 3],
+																		params.3[[id]][iter, 4],
+																		params.3[[id]][iter, 5],
+																		params.3[[id]][iter, 6],
+																		time.all)
 				}
-			}
-			
-			if(diffs) {
-				for(id in 1:N.g1) { #Get fixation level for each group 1 subject
-					curve1.0[id,] <- curve.f(mu1.ran[id], ht1.ran[id], s11.ran[id], s21.ran[id],
-																		b11.ran[id], b21.ran[id], time.all) -
-													 curve.f(mu3.ran[id], ht3.ran[id], s13.ran[id], s23.ran[id],
-																		b13.ran[id], b23.ran[id], time.all)
-				}
-				for(id in 1:N.g2) { #Get fixation level for each group 2 subject
-					curve2.0[id,] <- curve.f(mu2.ran[id], ht2.ran[id], s12.ran[id], s22.ran[id],
-																		b12.ran[id], b22.ran[id], time.all) -
-													 curve.f(mu4.ran[id], ht4.ran[id], s14.ran[id], s24.ran[id],
-																		b14.ran[id], b24.ran[id], time.all)
+				for(id in 1:N.g2){ #Get fixation level for each g2 subject
+					curve2.0[id,] <- curve.f(params.2[[id]][iter, 1],
+																		params.2[[id]][iter, 2],
+																		params.2[[id]][iter, 3],
+																		params.2[[id]][iter, 4],
+																		params.2[[id]][iter, 5],
+																		params.2[[id]][iter, 6],
+																		time.all) -
+													 curve.f(params.4[[id]][iter, 1],
+																		params.4[[id]][iter, 2],
+																		params.4[[id]][iter, 3],
+																		params.4[[id]][iter, 4],
+																		params.4[[id]][iter, 5],
+																		params.4[[id]][iter, 6],
+																		time.all)
 				}
 			} else {
-				for(id in 1:N.g1) { #Get fixation level for each group 1 subject
-					curve1.0[id,] <- curve.f(mu1.ran[id], ht1.ran[id], s11.ran[id], s21.ran[id],
-																		b11.ran[id], b21.ran[id], time.all)
+				for(id in 1:N.g1){ #Get fixation level for each g1 subject
+					curve1.0[id,] <- curve.f(params.1[[id]][iter, 1],
+																		params.1[[id]][iter, 2],
+																		params.1[[id]][iter, 3],
+																		params.1[[id]][iter, 4],
+																		params.1[[id]][iter, 5],
+																		params.1[[id]][iter, 6],
+																		time.all)
 				}
-				for(id in 1:N.g2) { #Get fixation level for each group 2 subject
-					curve2.0[id,] <- curve.f(mu2.ran[id], ht2.ran[id], s12.ran[id], s22.ran[id],
-																		b12.ran[id], b22.ran[id], time.all)
+				for(id in 1:N.g2){ #Get fixation level for each g2 subject
+					curve2.0[id,] <- curve.f(params.2[[id]][iter, 1],
+																		params.2[[id]][iter, 2],
+																		params.2[[id]][iter, 3],
+																		params.2[[id]][iter, 4],
+																		params.2[[id]][iter, 5],
+																		params.2[[id]][iter, 6],
+																		time.all)
 				}
 			}
-			
-			curve1 <- apply(curve1.0, 2, mean) #Mean fixations at each time point for CIs
-			curve2 <- apply(curve2.0, 2, mean) #Mean fixations at each time point for NHs
+
+			curve1 <- colMeans(curve1.0)
+			curve2 <- colMeans(curve2.0)
 			curve3 <- curve2 - curve1
 			
 			c(curve1, curve2, curve3, mu.temp.1, ht.temp.1, s1.temp.1, s2.temp.1, b1.temp.1, b2.temp.1,
@@ -481,12 +358,13 @@ doubleGauss.boot <- function(part1.list, seed = new.seed(), alpha = 0.05, paired
 	#1 : Estimate of rho
 	#2 : Overall Type I Error
 	#3 : Total tests we will perform
-	rho.est <- ar(t.val, FALSE, order.max = 1)$ar
+	#rho.est <- ar(t.val, FALSE, order.max = 1)$ar
+	rho.est <- ar1.solve(t.val)
 	if(p.adj == "oleson") {
 		if(paired) {
-			alphastar <- tsmultcomp(rho.est, alpha, N.tests, df = N.g1 - 1)
+			alphastar <- find.mod.alpha(rho.est, alpha = alpha, n = N.tests, df = N.g1 - 1, cores = min(2, cores), method = "t")
 		} else {
-			alphastar <- tsmultcomp(rho.est, alpha, N.tests, df = N.g1 + N.g2 - 2)
+			alphastar <- find.mod.alpha(rho.est, alpha = alpha, n = N.tests, df = N.g1 + N.g2 - 2, cores = min(2, cores), method = "t")
 		}
 		sig <- p.values <= alphastar
 	} else if(p.adj == "fdr") {

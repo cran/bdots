@@ -10,14 +10,15 @@ export(doubleGauss.boot,
 		subs.delete,
 		bdots.write.csv,
 		printFits,
-		tsmultcomp)
+		find.mod.alpha)
 
 import(parallel, doParallel, doRNG, foreach)
 importFrom("nlme", "gnls", "corAR1", "gnlsControl")
-importFrom("mvtnorm", "pmvnorm", "rmvnorm", "GenzBretz")
+importFrom("mvtnorm", "pmvnorm", "rmvnorm", "pmvt", "GenzBretz")
 importFrom("grDevices", "rgb")
 importFrom("graphics", "axis", "box", "hist", "legend", "lines", "par",
 	"plot", "rect", "title", "abline")
 importFrom("stats", "ar", "coef", "cov", "p.adjust", "pnorm", "pt",
-	"qt", "rnorm", "sd", "aggregate", "cor")
+	"qt", "rnorm", "sd", "aggregate", "cor", "uniroot", "lm")
 importFrom("utils", "tail", "write.csv")
+importFrom("Matrix", "nearPD")

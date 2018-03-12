@@ -61,18 +61,22 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 	
 	coef.id1 <- part1.list$coef.id1
 	sdev.id1 <- part1.list$sdev.id1
+	sdev.id1.cov <- part1.list$sdev.id1.cov
 	sigma.id1 <- part1.list$sigma.id1
 	
 	coef.id2 <- part1.list$coef.id2
 	sdev.id2 <- part1.list$sdev.id2
+	sdev.id2.cov <- part1.list$sdev.id2.cov
 	sigma.id2 <- part1.list$sigma.id2
 	
 	coef.id3 <- part1.list$coef.id3
 	sdev.id3 <- part1.list$sdev.id3
+	sdev.id3.cov <- part1.list$sdev.id3.cov
 	sigma.id3 <- part1.list$sigma.id3
 	
 	coef.id4 <- part1.list$coef.id4
 	sdev.id4 <- part1.list$sdev.id4
+	sdev.id4.cov <- part1.list$sdev.id4.cov
 	sigma.id4 <- part1.list$sigma.id4
 	
 	R2.g1.1 <- part1.list$R2.g1.1
@@ -119,7 +123,7 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 				old.cor <- cor.3[subj[i]]
 				if(is.null(fit.curve$fit)) {
 					coef.id3[subj[i],] <- rep(NA, 6)
-					sdev.id3[subj[i],] <- rep(NA, 6)
+					sdev.id3.cov[[subj[i]]] <- matrix(NA, nrow = 6, ncol = 6)
 					sigma.id3[subj[i],] <- NA
 					cor.3[subj[i]] <- NA
 					R2.g1.2[subj[i]] <- NA
@@ -127,8 +131,8 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 				} else {
 					cor.3[subj[i]] <- fit.curve$cor
 					fit.curve <- fit.curve$fit
-					coef.id3[subj[i],] <- coef(fit.curve)
 					sdev.id3[subj[i],] <- sqrt(diag(fit.curve$varBeta))
+					sdev.id3.cov[[subj[i]]] <- fit.curve$varBeta
 					sigma.id3[subj[i],] <- fit.curve$sigma
 					
 					SSY <- sum((y.fix - mean(y.fix)) ^ 2)
@@ -151,7 +155,7 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 				old.cor <- cor.1[subj[i]]
 				if(is.null(fit.curve$fit)) {
 					coef.id1[subj[i],] <- rep(NA, 6)
-					sdev.id1[subj[i],] <- rep(NA, 6)
+					sdev.id1.cov[[subj[i]]] <- matrix(NA, nrow = 6, ncol = 6)
 					sigma.id1[subj[i],] <- NA
 					cor.1[subj[i]] <- NA
 					R2.g1.1[subj[i]] <- NA
@@ -160,7 +164,7 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 					cor.1[subj[i]] <- fit.curve$cor
 					fit.curve <- fit.curve$fit
 					coef.id1[subj[i],] <- coef(fit.curve)
-					sdev.id1[subj[i],] <- sqrt(diag(fit.curve$varBeta))
+					sdev.id1.cov[[subj[i]]] <- fit.curve$varBeta
 					sigma.id1[subj[i],] <- fit.curve$sigma
 					
 					SSY <- sum((y.fix - mean(y.fix)) ^ 2)
@@ -195,7 +199,7 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 				old.cor <- cor.4[subj[i]]
 				if(is.null(fit.curve$fit)) {
 					coef.id4[subj[i],] <- rep(NA, 6)
-					sdev.id4[subj[i],] <- rep(NA, 6)
+					sdev.id4.cov[[subj[i]]] <- matrix(NA, nrow = 6, ncol = 6)
 					sigma.id4[subj[i],] <- NA
 					cor.4[subj[i]] <- NA
 					R2.g2.2[subj[i]] <- NA
@@ -204,7 +208,7 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 					cor.4[subj[i]] <- fit.curve$cor
 					fit.curve <- fit.curve$fit
 					coef.id4[subj[i],] <- coef(fit.curve)
-					sdev.id4[subj[i],] <- sqrt(diag(fit.curve$varBeta))
+					sdev.id4.cov[[subj[i]]] <- fit.curve$varBeta
 					sigma.id4[subj[i],] <- fit.curve$sigma
 					
 					SSY <- sum((y.fix - mean(y.fix)) ^ 2)
@@ -227,7 +231,7 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 				old.cor <- cor.2[subj[i]]
 				if(is.null(fit.curve$fit)) {
 					coef.id2[subj[i],] <- rep(NA, 6)
-					sdev.id2[subj[i],] <- rep(NA, 6)
+					sdev.id2.cov[[subj[i]]] <- matrix(NA, nrow = 6, ncol = 6)
 					sigma.id2[subj[i],] <- NA
 					cor.2[subj[i]] <- NA
 					R2.g2.1[subj[i]] <- NA
@@ -236,7 +240,7 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 					cor.2[subj[i]] <- fit.curve$cor
 					fit.curve <- fit.curve$fit
 					coef.id2[subj[i],] <- coef(fit.curve)
-					sdev.id2[subj[i],] <- sqrt(diag(fit.curve$varBeta))
+					sdev.id2.cov[[subj[i]]] <- fit.curve$varBeta
 					sigma.id2[subj[i],] <- fit.curve$sigma
 					
 					SSY <- sum((y.fix - mean(y.fix)) ^ 2)
@@ -259,16 +263,16 @@ doubleGauss.refit <- function(part1.list, subj = NULL, group = NULL, curves = NU
 	}
 	
 	part1.list$coef.id1 <- coef.id1 
-	part1.list$sdev.id1 <- sdev.id1 
+	part1.list$sdev.id1.cov <- sdev.id1.cov
 	part1.list$sigma.id1 <- sigma.id1 
 	part1.list$coef.id2 <- coef.id2 
-	part1.list$sdev.id2 <- sdev.id2 
+	part1.list$sdev.id2.cov <- sdev.id2.cov
 	part1.list$sigma.id2 <- sigma.id2
 	part1.list$coef.id3 <- coef.id3 
-	part1.list$sdev.id3 <- sdev.id3 
+	part1.list$sdev.id3.cov <- sdev.id3.cov
 	part1.list$sigma.id3 <- sigma.id3
 	part1.list$coef.id4 <- coef.id4 
-	part1.list$sdev.id4 <- sdev.id4 
+	part1.list$sdev.id4.cov <- sdev.id4.cov
 	part1.list$sigma.id4 <- sigma.id4
 	
 	part1.list$R2.g1.1 <- R2.g1.1
