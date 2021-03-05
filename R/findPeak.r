@@ -1,1 +1,0 @@
-find.peak <- function(time, fixations) max(fixations)
