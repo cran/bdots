@@ -311,81 +311,57 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 
 
 
-<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1"><span class="kw">library</span>(bdots)</a></code></pre></div>
-<p>We saw in the <a href="bdots.html">general overview</a> when first generating our model fits with <code>bdotsFit</code> that we we could specify the curve with the argument <code>curveType</code>. Presently, the <code>bdots</code> package contains three options for this, <code>doubleGauss</code>, <code>logistic</code>, and <code>polynomial</code>. Documentation is included for each of these cuves.</p>
-<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">fit &lt;-<span class="st"> </span><span class="kw">bdotsFit</span>(<span class="dt">data =</span> cohort_unrelated,</a>
-<a class="sourceLine" id="cb2-2" title="2">                <span class="dt">subject =</span> <span class="st">&quot;Subject&quot;</span>,</a>
-<a class="sourceLine" id="cb2-3" title="3">                <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>,</a>
-<a class="sourceLine" id="cb2-4" title="4">                <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>,</a>
-<a class="sourceLine" id="cb2-5" title="5">                <span class="dt">group =</span> <span class="kw">c</span>(<span class="st">&quot;DB_cond&quot;</span>, <span class="st">&quot;LookType&quot;</span>),</a>
-<a class="sourceLine" id="cb2-6" title="6">                <span class="dt">curveType =</span> <span class="kw">doubleGauss</span>(<span class="dt">concave =</span> <span class="ot">TRUE</span>),</a>
-<a class="sourceLine" id="cb2-7" title="7">                <span class="dt">cores =</span> <span class="dv">2</span>)</a></code></pre></div>
-<p>Note that each of these is a function in their own right and must be passed in as a <code>call</code>. For curve functions that include arguments further specifying the curve, i.e., <code>doubleGauss(concave = TRUE)</code> and <code>polynomial(degree = n)</code>, these are passed in when <code>bdots</code> is called. Because each of the functions exists independently of <code>bdotsFit</code>, users can specify their own curve functions for the fitting and bootstrapping process. The purpose of this vignette is to demonstrate how to do so. If you find that you have a curve function that is especially useful, please create a request to have it added to the <code>bdots</code> package <a href="https://github.com/collinn/bdots/issues">here</a>.</p>
-<p>We will examine the <code>doubleGauss</code> function in more detail to see how we might go about creating our own. First, let’s identify the pieces of this function</p>
-<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">doubleGauss</a>
-<a class="sourceLine" id="cb3-2" title="2"><span class="co">#&gt; function (dat, y, time, params = NULL, concave = TRUE, ...) </span></a>
-<a class="sourceLine" id="cb3-3" title="3"><span class="co">#&gt; {</span></a>
-<a class="sourceLine" id="cb3-4" title="4"><span class="co">#&gt;     dgaussPars &lt;- function(dat, y, time, conc = concave) {</span></a>
-<a class="sourceLine" id="cb3-5" title="5"><span class="co">#&gt;         time &lt;- dat[[time]]</span></a>
-<a class="sourceLine" id="cb3-6" title="6"><span class="co">#&gt;         y &lt;- dat[[y]]</span></a>
-<a class="sourceLine" id="cb3-7" title="7"><span class="co">#&gt;         mu &lt;- ifelse(conc, time[which.max(y)], time[which.min(y)])</span></a>
-<a class="sourceLine" id="cb3-8" title="8"><span class="co">#&gt;         ht &lt;- ifelse(conc, max(y), min(y))</span></a>
-<a class="sourceLine" id="cb3-9" title="9"><span class="co">#&gt;         base1 &lt;- ifelse(conc, min(y[time &lt; mu]), max(y[time &lt; </span></a>
-<a class="sourceLine" id="cb3-10" title="10"><span class="co">#&gt;             mu]))</span></a>
-<a class="sourceLine" id="cb3-11" title="11"><span class="co">#&gt;         base2 &lt;- ifelse(conc, min(y[time &gt; mu]), max(y[time &gt; </span></a>
-<a class="sourceLine" id="cb3-12" title="12"><span class="co">#&gt;             mu]))</span></a>
-<a class="sourceLine" id="cb3-13" title="13"><span class="co">#&gt;         y1 &lt;- y - base1</span></a>
-<a class="sourceLine" id="cb3-14" title="14"><span class="co">#&gt;         y1 &lt;- rev(y1[time &lt;= mu])</span></a>
-<a class="sourceLine" id="cb3-15" title="15"><span class="co">#&gt;         time1 &lt;- rev(time[time &lt;= mu])</span></a>
-<a class="sourceLine" id="cb3-16" title="16"><span class="co">#&gt;         totalY1 &lt;- sum(y1)</span></a>
-<a class="sourceLine" id="cb3-17" title="17"><span class="co">#&gt;         sigma1 &lt;- mu - time1[which.min(abs((pnorm(1) - pnorm(-1)) * </span></a>
-<a class="sourceLine" id="cb3-18" title="18"><span class="co">#&gt;             totalY1 - cumsum(y1)))]</span></a>
-<a class="sourceLine" id="cb3-19" title="19"><span class="co">#&gt;         y2 &lt;- y - base2</span></a>
-<a class="sourceLine" id="cb3-20" title="20"><span class="co">#&gt;         y2 &lt;- y2[time &gt;= mu]</span></a>
-<a class="sourceLine" id="cb3-21" title="21"><span class="co">#&gt;         time2 &lt;- time[time &gt;= mu]</span></a>
-<a class="sourceLine" id="cb3-22" title="22"><span class="co">#&gt;         totalY2 &lt;- sum(y2)</span></a>
-<a class="sourceLine" id="cb3-23" title="23"><span class="co">#&gt;         sigma2 &lt;- time2[which.min(abs((pnorm(1) - pnorm(-1)) * </span></a>
-<a class="sourceLine" id="cb3-24" title="24"><span class="co">#&gt;             totalY2 - cumsum(y2)))] - mu</span></a>
-<a class="sourceLine" id="cb3-25" title="25"><span class="co">#&gt;         return(c(mu = mu, ht = ht, sig1 = sigma1, sig2 = sigma2, </span></a>
-<a class="sourceLine" id="cb3-26" title="26"><span class="co">#&gt;             base1 = base1, base2 = base2))</span></a>
-<a class="sourceLine" id="cb3-27" title="27"><span class="co">#&gt;     }</span></a>
-<a class="sourceLine" id="cb3-28" title="28"><span class="co">#&gt;     if (is.null(params)) {</span></a>
-<a class="sourceLine" id="cb3-29" title="29"><span class="co">#&gt;         params &lt;- dgaussPars(dat, y, time, concave)</span></a>
-<a class="sourceLine" id="cb3-30" title="30"><span class="co">#&gt;     }</span></a>
-<a class="sourceLine" id="cb3-31" title="31"><span class="co">#&gt;     else {</span></a>
-<a class="sourceLine" id="cb3-32" title="32"><span class="co">#&gt;         if (length(params) != 6) </span></a>
-<a class="sourceLine" id="cb3-33" title="33"><span class="co">#&gt;             stop(&quot;doubleGauss requires 6 parameters be specified for refitting&quot;)</span></a>
-<a class="sourceLine" id="cb3-34" title="34"><span class="co">#&gt;         if (!all(names(params) %in% c(&quot;mu&quot;, &quot;ht&quot;, &quot;sig1&quot;, &quot;sig2&quot;, </span></a>
-<a class="sourceLine" id="cb3-35" title="35"><span class="co">#&gt;             &quot;base1&quot;, &quot;base2&quot;))) {</span></a>
-<a class="sourceLine" id="cb3-36" title="36"><span class="co">#&gt;             stop(&quot;doubleGauss parameters for refitting must be correctly labeled&quot;)</span></a>
-<a class="sourceLine" id="cb3-37" title="37"><span class="co">#&gt;         }</span></a>
-<a class="sourceLine" id="cb3-38" title="38"><span class="co">#&gt;     }</span></a>
-<a class="sourceLine" id="cb3-39" title="39"><span class="co">#&gt;     y &lt;- str2lang(y)</span></a>
-<a class="sourceLine" id="cb3-40" title="40"><span class="co">#&gt;     time &lt;- str2lang(time)</span></a>
-<a class="sourceLine" id="cb3-41" title="41"><span class="co">#&gt;     ff &lt;- bquote(.(y) ~ (.(time) &lt; mu) * (exp(-1 * (.(time) - </span></a>
-<a class="sourceLine" id="cb3-42" title="42"><span class="co">#&gt;         mu)^2/(2 * sig1^2)) * (ht - base1) + base1) + (mu &lt;= </span></a>
-<a class="sourceLine" id="cb3-43" title="43"><span class="co">#&gt;         .(time)) * (exp(-1 * (.(time) - mu)^2/(2 * sig2^2)) * </span></a>
-<a class="sourceLine" id="cb3-44" title="44"><span class="co">#&gt;         (ht - base2) + base2))</span></a>
-<a class="sourceLine" id="cb3-45" title="45"><span class="co">#&gt;     attr(ff, &quot;parnames&quot;) &lt;- names(params)</span></a>
-<a class="sourceLine" id="cb3-46" title="46"><span class="co">#&gt;     return(list(formula = ff, params = params))</span></a>
-<a class="sourceLine" id="cb3-47" title="47"><span class="co">#&gt; }</span></a>
-<a class="sourceLine" id="cb3-48" title="48"><span class="co">#&gt; &lt;bytecode: 0x555b36714498&gt;</span></a>
-<a class="sourceLine" id="cb3-49" title="49"><span class="co">#&gt; &lt;environment: namespace:bdots&gt;</span></a></code></pre></div>
+<p>We saw in the <a href="bdots.html">general overview</a> when first generating our model fits with <code>bdotsFit</code> that we we could specify the curve with the argument <code>curveType</code>. Presently, the <code>bdots</code> package contains three options for this: <code>doubleGauss</code>, <code>logistic</code>, and <code>polynomial</code>. Documentation is included for each of these curves.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb1-1" title="1">fit &lt;-<span class="st"> </span><span class="kw">bdotsFit</span>(<span class="dt">data =</span> cohort_unrelated,</a>
+<a class="sourceLine" id="cb1-2" title="2">                <span class="dt">subject =</span> <span class="st">&quot;Subject&quot;</span>,</a>
+<a class="sourceLine" id="cb1-3" title="3">                <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>,</a>
+<a class="sourceLine" id="cb1-4" title="4">                <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>,</a>
+<a class="sourceLine" id="cb1-5" title="5">                <span class="dt">group =</span> <span class="kw">c</span>(<span class="st">&quot;DB_cond&quot;</span>, <span class="st">&quot;LookType&quot;</span>),</a>
+<a class="sourceLine" id="cb1-6" title="6">                <span class="dt">curveType =</span> <span class="kw">doubleGauss</span>(<span class="dt">concave =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb1-7" title="7">                <span class="dt">cores =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p>Note that each of these is a function in their own right and must be passed in as a <code>call</code> object. Curve functions that include arguments further specifying the type of curve, i.e., <code>doubleGauss(concave = TRUE)</code> and <code>polynomial(degree = n)</code>, should include these when the call is passed into <code>bdotsFit</code> as seen in the example above.</p>
+<p>Because each of the functions exists independently of <code>bdotsFit</code>, users can specify their own curve functions for the fitting and bootstrapping process. The purpose of this vignette is to demonstrate how to do so. If you find that you have a curve function that is especially useful, please create a request to have it added to the <code>bdots</code> package <a href="https://github.com/collinn/bdots/issues">here</a>.</p>
+<p>We will examine the <code>doubleGauss</code> function in more detail to see how we might go about creating our own. First, let’s identify the components of this function</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb2-1" title="1">doubleGauss</a>
+<a class="sourceLine" id="cb2-2" title="2"><span class="co">#&gt; function (dat, y, time, params = NULL, concave = TRUE, ...) </span></a>
+<a class="sourceLine" id="cb2-3" title="3"><span class="co">#&gt; {</span></a>
+<a class="sourceLine" id="cb2-4" title="4"><span class="co">#&gt;     if (is.null(params)) {</span></a>
+<a class="sourceLine" id="cb2-5" title="5"><span class="co">#&gt;         params &lt;- dgaussPars(dat, y, time, concave)</span></a>
+<a class="sourceLine" id="cb2-6" title="6"><span class="co">#&gt;     }</span></a>
+<a class="sourceLine" id="cb2-7" title="7"><span class="co">#&gt;     else {</span></a>
+<a class="sourceLine" id="cb2-8" title="8"><span class="co">#&gt;         if (length(params) != 6) </span></a>
+<a class="sourceLine" id="cb2-9" title="9"><span class="co">#&gt;             stop(&quot;doubleGauss requires 6 parameters be specified for refitting&quot;)</span></a>
+<a class="sourceLine" id="cb2-10" title="10"><span class="co">#&gt;         if (!all(names(params) %in% c(&quot;mu&quot;, &quot;ht&quot;, &quot;sig1&quot;, &quot;sig2&quot;, </span></a>
+<a class="sourceLine" id="cb2-11" title="11"><span class="co">#&gt;             &quot;base1&quot;, &quot;base2&quot;))) {</span></a>
+<a class="sourceLine" id="cb2-12" title="12"><span class="co">#&gt;             stop(&quot;doubleGauss parameters for refitting must be correctly labeled&quot;)</span></a>
+<a class="sourceLine" id="cb2-13" title="13"><span class="co">#&gt;         }</span></a>
+<a class="sourceLine" id="cb2-14" title="14"><span class="co">#&gt;     }</span></a>
+<a class="sourceLine" id="cb2-15" title="15"><span class="co">#&gt;     y &lt;- str2lang(y)</span></a>
+<a class="sourceLine" id="cb2-16" title="16"><span class="co">#&gt;     time &lt;- str2lang(time)</span></a>
+<a class="sourceLine" id="cb2-17" title="17"><span class="co">#&gt;     ff &lt;- bquote(.(y) ~ (.(time) &lt; mu) * (exp(-1 * (.(time) - </span></a>
+<a class="sourceLine" id="cb2-18" title="18"><span class="co">#&gt;         mu)^2/(2 * sig1^2)) * (ht - base1) + base1) + (mu &lt;= </span></a>
+<a class="sourceLine" id="cb2-19" title="19"><span class="co">#&gt;         .(time)) * (exp(-1 * (.(time) - mu)^2/(2 * sig2^2)) * </span></a>
+<a class="sourceLine" id="cb2-20" title="20"><span class="co">#&gt;         (ht - base2) + base2))</span></a>
+<a class="sourceLine" id="cb2-21" title="21"><span class="co">#&gt;     attr(ff, &quot;parnames&quot;) &lt;- names(params)</span></a>
+<a class="sourceLine" id="cb2-22" title="22"><span class="co">#&gt;     return(list(formula = ff, params = params))</span></a>
+<a class="sourceLine" id="cb2-23" title="23"><span class="co">#&gt; }</span></a>
+<a class="sourceLine" id="cb2-24" title="24"><span class="co">#&gt; &lt;bytecode: 0x55617fac2140&gt;</span></a>
+<a class="sourceLine" id="cb2-25" title="25"><span class="co">#&gt; &lt;environment: namespace:bdots&gt;</span></a></code></pre></div>
 <p>There are four things to note:</p>
 <ol style="list-style-type: decimal">
 <li><dl>
 <dt>Arguments</dt>
-<dd>In addition to the argument <code>concave = TRUE</code>, which specifies the curve, we also have <code>dat</code>, <code>y</code>, <code>time</code>, <code>params = NULL</code>, and <code>...</code>. These are the names that must be used for the function to be called correctly. The first represents a <code>data.frame</code> or <code>data.table</code> subset from the <code>data</code> argument to <code>bdotsFit</code>, while <code>y</code> and <code>time</code> correspond to their respective arguments in <code>bdotsFit</code>. It’s important to remember to set <code>params = NULL</code>, as this is only used during the refitting step.
+<dd>In addition to the argument <code>concave = TRUE</code>, which specifies the curve, we also have <code>dat</code>, <code>y</code>, <code>time</code>, <code>params = NULL</code>, and <code>...</code>. These are the names that must be used for the function to be called correctly. The first represents a <code>data.frame</code> or <code>data.table</code> subset from the <code>data</code> argument to <code>bdotsFit</code>, while <code>y</code> and <code>time</code> correspond to their respective arguments in <code>bdotsFit</code> and should assume that the arguments are passed in as <code>character</code>. It’s important to remember to set <code>params = NULL</code>, as this is only used during the refitting step.
 </dd>
 </dl></li>
 <li><dl>
 <dt>Body</dt>
-<dd>As can be seen here, when <code>params = NULL</code>, the body of the function computes the necessary parameters to be used with the <code>gnls</code> package. When <code>params</code> is not <code>NULL</code>, it’s usually a good idea to verify that it is the correct length and has the correct parameter names. Otherwise, the starting parameters are computed from the data that has been passed in.
+<dd>As can be seen here, when <code>params = NULL</code>, the body of the function computes the necessary starting parameters to be used with the <code>gnls</code> fitting function. In this case, the function <code>dgaussPars</code> handles the initial parameter estimation and returns a named <code>numeric</code>. When <code>params</code> is not <code>NULL</code>, it’s usually a good idea to verify that it is the correct length and has the correct parameter names.
 </dd>
 </dl></li>
 <li><dl>
 <dt>Formula</dt>
-<dd>Care must be excercised when creating the <code>formula</code> object, as it must be quoted. One may use <code>bquote</code> and <code>str2lang</code> to substitue in the <code>character</code> values for <code>y</code> and <code>time</code>. Alternatively, if this is to only be used for a particular dataset, one can simply use <code>quote</code> with the appropriate values used for <code>y</code> and <code>time</code>. Finally, the quoted <code>formula</code> should contain a single attribute <code>parnames</code> which has the names of the parameters used.
+<dd>Care must be exercised when creating the <code>formula</code> object, as it must be quoted. One may use <code>bquote</code> and <code>str2lang</code> to substitute in the <code>character</code> values for <code>y</code> and <code>time</code>. Alternatively, if this is to only be used for a particular data set, one can simply use <code>quote</code> with the appropriate values used for <code>y</code> and <code>time</code>, as we will demonstrate below. Finally, the quoted <code>formula</code> should contain a single attribute <code>parnames</code> which has the names of the parameters used.
 </dd>
 </dl></li>
 <li><dl>
@@ -394,107 +370,84 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 </dd>
 </dl></li>
 </ol>
-<p>Briefly, we can see how this function is used by subsetting the data and calling it directly.</p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co">## Return a unique subject/group permutation</span></a>
-<a class="sourceLine" id="cb4-2" title="2">dat &lt;-<span class="st"> </span>cohort_unrelated[Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>DB_cond <span class="op">==</span><span class="st"> </span><span class="dv">50</span> <span class="op">&amp;</span><span class="st"> </span>LookType <span class="op">==</span><span class="st"> &quot;Cohort&quot;</span>, ]</a>
-<a class="sourceLine" id="cb4-3" title="3">dat</a>
-<a class="sourceLine" id="cb4-4" title="4"><span class="co">#&gt;      Subject Time DB_cond  Fixations LookType Group</span></a>
-<a class="sourceLine" id="cb4-5" title="5"><span class="co">#&gt;   1:       1    0      50 0.01136364   Cohort    50</span></a>
-<a class="sourceLine" id="cb4-6" title="6"><span class="co">#&gt;   2:       1    4      50 0.01136364   Cohort    50</span></a>
-<a class="sourceLine" id="cb4-7" title="7"><span class="co">#&gt;   3:       1    8      50 0.01136364   Cohort    50</span></a>
-<a class="sourceLine" id="cb4-8" title="8"><span class="co">#&gt;   4:       1   12      50 0.01136364   Cohort    50</span></a>
-<a class="sourceLine" id="cb4-9" title="9"><span class="co">#&gt;   5:       1   16      50 0.02272727   Cohort    50</span></a>
-<a class="sourceLine" id="cb4-10" title="10"><span class="co">#&gt;  ---                                               </span></a>
-<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt; 497:       1 1984      50 0.02272727   Cohort    50</span></a>
-<a class="sourceLine" id="cb4-12" title="12"><span class="co">#&gt; 498:       1 1988      50 0.02272727   Cohort    50</span></a>
-<a class="sourceLine" id="cb4-13" title="13"><span class="co">#&gt; 499:       1 1992      50 0.02272727   Cohort    50</span></a>
-<a class="sourceLine" id="cb4-14" title="14"><span class="co">#&gt; 500:       1 1996      50 0.02272727   Cohort    50</span></a>
-<a class="sourceLine" id="cb4-15" title="15"><span class="co">#&gt; 501:       1 2000      50 0.02272727   Cohort    50</span></a></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1"><span class="co">## See return value</span></a>
-<a class="sourceLine" id="cb5-2" title="2"><span class="kw">doubleGauss</span>(<span class="dt">dat =</span> dat, <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>, <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>, <span class="dt">concave =</span> <span class="ot">TRUE</span>)</a>
-<a class="sourceLine" id="cb5-3" title="3"><span class="co">#&gt; $formula</span></a>
-<a class="sourceLine" id="cb5-4" title="4"><span class="co">#&gt; Fixations ~ (Time &lt; mu) * (exp(-1 * (Time - mu)^2/(2 * sig1^2)) * </span></a>
-<a class="sourceLine" id="cb5-5" title="5"><span class="co">#&gt;     (ht - base1) + base1) + (mu &lt;= Time) * (exp(-1 * (Time - </span></a>
-<a class="sourceLine" id="cb5-6" title="6"><span class="co">#&gt;     mu)^2/(2 * sig2^2)) * (ht - base2) + base2)</span></a>
-<a class="sourceLine" id="cb5-7" title="7"><span class="co">#&gt; attr(,&quot;parnames&quot;)</span></a>
-<a class="sourceLine" id="cb5-8" title="8"><span class="co">#&gt; [1] &quot;mu&quot;    &quot;ht&quot;    &quot;sig1&quot;  &quot;sig2&quot;  &quot;base1&quot; &quot;base2&quot;</span></a>
-<a class="sourceLine" id="cb5-9" title="9"><span class="co">#&gt; </span></a>
-<a class="sourceLine" id="cb5-10" title="10"><span class="co">#&gt; $params</span></a>
-<a class="sourceLine" id="cb5-11" title="11"><span class="co">#&gt;           mu           ht         sig1         sig2        base1        base2 </span></a>
-<a class="sourceLine" id="cb5-12" title="12"><span class="co">#&gt; 428.00000000   0.21590909 152.00000000 396.00000000   0.01136364   0.02272727</span></a></code></pre></div>
-<p>We will now create an entirely new function that is not included in <code>bdots</code> and demonstrate that it works the same. The only change we will make is to substitute in the values for <code>y</code> and <code>time</code> without using <code>str2lang</code>.</p>
-<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1">doubleGauss2 &lt;-<span class="st"> </span><span class="cf">function</span> (dat, <span class="dt">params =</span> <span class="ot">NULL</span>, <span class="dt">concave =</span> <span class="ot">TRUE</span>, ...) {</a>
-<a class="sourceLine" id="cb6-2" title="2">    dgaussPars &lt;-<span class="st"> </span><span class="cf">function</span>(dat, <span class="dt">conc =</span> concave) {</a>
-<a class="sourceLine" id="cb6-3" title="3">        time &lt;-<span class="st"> </span>dat[[<span class="st">&quot;Time&quot;</span>]]</a>
-<a class="sourceLine" id="cb6-4" title="4">        y &lt;-<span class="st"> </span>dat[[<span class="st">&quot;Fixations&quot;</span>]]</a>
-<a class="sourceLine" id="cb6-5" title="5">        mu &lt;-<span class="st"> </span><span class="kw">ifelse</span>(conc, time[<span class="kw">which.max</span>(y)], time[<span class="kw">which.min</span>(y)])</a>
-<a class="sourceLine" id="cb6-6" title="6">        ht &lt;-<span class="st"> </span><span class="kw">ifelse</span>(conc, <span class="kw">max</span>(y), <span class="kw">min</span>(y))</a>
-<a class="sourceLine" id="cb6-7" title="7">        base1 &lt;-<span class="st"> </span><span class="kw">ifelse</span>(conc, <span class="kw">min</span>(y[time <span class="op">&lt;</span><span class="st"> </span>mu]), <span class="kw">max</span>(y[time <span class="op">&lt;</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb6-8" title="8"><span class="st">            </span>mu]))</a>
-<a class="sourceLine" id="cb6-9" title="9">        base2 &lt;-<span class="st"> </span><span class="kw">ifelse</span>(conc, <span class="kw">min</span>(y[time <span class="op">&gt;</span><span class="st"> </span>mu]), <span class="kw">max</span>(y[time <span class="op">&gt;</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb6-10" title="10"><span class="st">            </span>mu]))</a>
-<a class="sourceLine" id="cb6-11" title="11">        y1 &lt;-<span class="st"> </span>y <span class="op">-</span><span class="st"> </span>base1</a>
-<a class="sourceLine" id="cb6-12" title="12">        y1 &lt;-<span class="st"> </span><span class="kw">rev</span>(y1[time <span class="op">&lt;=</span><span class="st"> </span>mu])</a>
-<a class="sourceLine" id="cb6-13" title="13">        time1 &lt;-<span class="st"> </span><span class="kw">rev</span>(time[time <span class="op">&lt;=</span><span class="st"> </span>mu])</a>
-<a class="sourceLine" id="cb6-14" title="14">        totalY1 &lt;-<span class="st"> </span><span class="kw">sum</span>(y1)</a>
-<a class="sourceLine" id="cb6-15" title="15">        sigma1 &lt;-<span class="st"> </span>mu <span class="op">-</span><span class="st"> </span>time1[<span class="kw">which.min</span>(<span class="kw">abs</span>((<span class="kw">pnorm</span>(<span class="dv">1</span>) <span class="op">-</span><span class="st"> </span><span class="kw">pnorm</span>(<span class="op">-</span><span class="dv">1</span>)) <span class="op">*</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb6-16" title="16"><span class="st">            </span>totalY1 <span class="op">-</span><span class="st"> </span><span class="kw">cumsum</span>(y1)))]</a>
-<a class="sourceLine" id="cb6-17" title="17">        y2 &lt;-<span class="st"> </span>y <span class="op">-</span><span class="st"> </span>base2</a>
-<a class="sourceLine" id="cb6-18" title="18">        y2 &lt;-<span class="st"> </span>y2[time <span class="op">&gt;=</span><span class="st"> </span>mu]</a>
-<a class="sourceLine" id="cb6-19" title="19">        time2 &lt;-<span class="st"> </span>time[time <span class="op">&gt;=</span><span class="st"> </span>mu]</a>
-<a class="sourceLine" id="cb6-20" title="20">        totalY2 &lt;-<span class="st"> </span><span class="kw">sum</span>(y2)</a>
-<a class="sourceLine" id="cb6-21" title="21">        sigma2 &lt;-<span class="st"> </span>time2[<span class="kw">which.min</span>(<span class="kw">abs</span>((<span class="kw">pnorm</span>(<span class="dv">1</span>) <span class="op">-</span><span class="st"> </span><span class="kw">pnorm</span>(<span class="op">-</span><span class="dv">1</span>)) <span class="op">*</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb6-22" title="22"><span class="st">            </span>totalY2 <span class="op">-</span><span class="st"> </span><span class="kw">cumsum</span>(y2)))] <span class="op">-</span><span class="st"> </span>mu</a>
-<a class="sourceLine" id="cb6-23" title="23">        <span class="kw">return</span>(<span class="kw">c</span>(<span class="dt">mu =</span> mu, <span class="dt">ht =</span> ht, <span class="dt">sig1 =</span> sigma1, <span class="dt">sig2 =</span> sigma2, </a>
-<a class="sourceLine" id="cb6-24" title="24">            <span class="dt">base1 =</span> base1, <span class="dt">base2 =</span> base2))</a>
-<a class="sourceLine" id="cb6-25" title="25">    }</a>
-<a class="sourceLine" id="cb6-26" title="26">    <span class="cf">if</span> (<span class="kw">is.null</span>(params)) {</a>
-<a class="sourceLine" id="cb6-27" title="27">        params &lt;-<span class="st"> </span><span class="kw">dgaussPars</span>(dat, concave)</a>
-<a class="sourceLine" id="cb6-28" title="28">    }</a>
-<a class="sourceLine" id="cb6-29" title="29">    <span class="cf">else</span> {</a>
-<a class="sourceLine" id="cb6-30" title="30">        <span class="cf">if</span> (<span class="kw">length</span>(params) <span class="op">!=</span><span class="st"> </span><span class="dv">6</span>) </a>
-<a class="sourceLine" id="cb6-31" title="31">            <span class="kw">stop</span>(<span class="st">&quot;doubleGauss requires 6 parameters be specified for refitting&quot;</span>)</a>
-<a class="sourceLine" id="cb6-32" title="32">        <span class="cf">if</span> (<span class="op">!</span><span class="kw">all</span>(<span class="kw">names</span>(params) <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;mu&quot;</span>, <span class="st">&quot;ht&quot;</span>, <span class="st">&quot;sig1&quot;</span>, <span class="st">&quot;sig2&quot;</span>, </a>
-<a class="sourceLine" id="cb6-33" title="33">            <span class="st">&quot;base1&quot;</span>, <span class="st">&quot;base2&quot;</span>))) {</a>
-<a class="sourceLine" id="cb6-34" title="34">            <span class="kw">stop</span>(<span class="st">&quot;doubleGauss parameters for refitting must be correctly labeled&quot;</span>)</a>
-<a class="sourceLine" id="cb6-35" title="35">        }</a>
-<a class="sourceLine" id="cb6-36" title="36">    }</a>
-<a class="sourceLine" id="cb6-37" title="37"></a>
-<a class="sourceLine" id="cb6-38" title="38">    <span class="co">## Here, we use Fixations and Time directly</span></a>
-<a class="sourceLine" id="cb6-39" title="39">    ff &lt;-<span class="st"> </span><span class="kw">bquote</span>(Fixations <span class="op">~</span><span class="st"> </span>(Time <span class="op">&lt;</span><span class="st"> </span>mu) <span class="op">*</span><span class="st"> </span>(<span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span> <span class="op">*</span><span class="st"> </span>(Time <span class="op">-</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb6-40" title="40"><span class="st">        </span>mu)<span class="op">^</span><span class="dv">2</span><span class="op">/</span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>sig1<span class="op">^</span><span class="dv">2</span>)) <span class="op">*</span><span class="st"> </span>(ht <span class="op">-</span><span class="st"> </span>base1) <span class="op">+</span><span class="st"> </span>base1) <span class="op">+</span><span class="st"> </span>(mu <span class="op">&lt;=</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb6-41" title="41"><span class="st">        </span>Time) <span class="op">*</span><span class="st"> </span>(<span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span> <span class="op">*</span><span class="st"> </span>(Time <span class="op">-</span><span class="st"> </span>mu)<span class="op">^</span><span class="dv">2</span><span class="op">/</span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>sig2<span class="op">^</span><span class="dv">2</span>)) <span class="op">*</span><span class="st"> </span></a>
-<a class="sourceLine" id="cb6-42" title="42"><span class="st">        </span>(ht <span class="op">-</span><span class="st"> </span>base2) <span class="op">+</span><span class="st"> </span>base2))</a>
-<a class="sourceLine" id="cb6-43" title="43">    <span class="kw">return</span>(<span class="kw">list</span>(<span class="dt">formula =</span> ff, <span class="dt">params =</span> params))</a>
-<a class="sourceLine" id="cb6-44" title="44">}</a>
-<a class="sourceLine" id="cb6-45" title="45"></a>
-<a class="sourceLine" id="cb6-46" title="46">same_fit_different_day &lt;-<span class="st"> </span><span class="kw">bdotsFit</span>(<span class="dt">data =</span> cohort_unrelated,</a>
-<a class="sourceLine" id="cb6-47" title="47">                                   <span class="dt">subject =</span> <span class="st">&quot;Subject&quot;</span>,</a>
-<a class="sourceLine" id="cb6-48" title="48">                                   <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>,</a>
-<a class="sourceLine" id="cb6-49" title="49">                                   <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>,</a>
-<a class="sourceLine" id="cb6-50" title="50">                                   <span class="dt">group =</span> <span class="kw">c</span>(<span class="st">&quot;DB_cond&quot;</span>, <span class="st">&quot;LookType&quot;</span>),</a>
-<a class="sourceLine" id="cb6-51" title="51">                                   <span class="dt">curveType =</span> <span class="kw">doubleGauss2</span>(<span class="dt">concave =</span> <span class="ot">TRUE</span>),</a>
-<a class="sourceLine" id="cb6-52" title="52">                                   <span class="dt">cores =</span> <span class="dv">2</span>)</a></code></pre></div>
-<p>Because the curves are fit randomly and seeds have not yet be implemented, we can only roughly verify that each function returns similar results.</p>
-<div class="sourceCode" id="cb7"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb7-1" title="1"><span class="co">## Original fit</span></a>
-<a class="sourceLine" id="cb7-2" title="2"><span class="kw">head</span>(<span class="kw">coef</span>(fit))</a>
-<a class="sourceLine" id="cb7-3" title="3"><span class="co">#&gt;            mu        ht     sig1     sig2        base1      base2</span></a>
-<a class="sourceLine" id="cb7-4" title="4"><span class="co">#&gt; [1,] 429.7595 0.1985978 159.8869 314.6389  0.009709831 0.03376106</span></a>
-<a class="sourceLine" id="cb7-5" title="5"><span class="co">#&gt; [2,] 634.9292 0.2635044 303.8080 215.3845 -0.020636088 0.02892360</span></a>
-<a class="sourceLine" id="cb7-6" title="6"><span class="co">#&gt; [3,] 647.0655 0.2543769 518.9633 255.9870 -0.213087542 0.01368196</span></a>
-<a class="sourceLine" id="cb7-7" title="7"><span class="co">#&gt; [4,] 723.0547 0.2582110 392.9495 252.9384 -0.054826156 0.03197291</span></a>
-<a class="sourceLine" id="cb7-8" title="8"><span class="co">#&gt; [5,] 501.4822 0.2247729 500.8480 158.4180 -0.331679043 0.02522681</span></a>
-<a class="sourceLine" id="cb7-9" title="9"><span class="co">#&gt; [6,] 460.7152 0.3067659 382.7321 166.0833 -0.243308563 0.03992168</span></a>
-<a class="sourceLine" id="cb7-10" title="10"></a>
-<a class="sourceLine" id="cb7-11" title="11"><span class="co">## &quot;New&quot; fit</span></a>
-<a class="sourceLine" id="cb7-12" title="12"><span class="kw">head</span>(<span class="kw">coef</span>(same_fit_different_day))</a>
-<a class="sourceLine" id="cb7-13" title="13"><span class="co">#&gt;            mu        ht     sig1     sig2        base1      base2</span></a>
-<a class="sourceLine" id="cb7-14" title="14"><span class="co">#&gt; [1,] 429.7595 0.1985978 159.8869 314.6389  0.009709831 0.03376106</span></a>
-<a class="sourceLine" id="cb7-15" title="15"><span class="co">#&gt; [2,] 634.9292 0.2635044 303.8080 215.3845 -0.020636088 0.02892360</span></a>
-<a class="sourceLine" id="cb7-16" title="16"><span class="co">#&gt; [3,] 647.0655 0.2543769 518.9633 255.9870 -0.213087542 0.01368196</span></a>
-<a class="sourceLine" id="cb7-17" title="17"><span class="co">#&gt; [4,] 723.0547 0.2582110 392.9495 252.9384 -0.054826156 0.03197291</span></a>
-<a class="sourceLine" id="cb7-18" title="18"><span class="co">#&gt; [5,] 501.4822 0.2247729 500.8480 158.4180 -0.331679043 0.02522681</span></a>
-<a class="sourceLine" id="cb7-19" title="19"><span class="co">#&gt; [6,] 460.7152 0.3067659 382.7321 166.0833 -0.243308563 0.03992168</span></a></code></pre></div>
+<p>Briefly, we can see how this function is used by subsetting the data to a single subject and calling it directly.</p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1"><span class="co">## Return a unique subject/group permutation</span></a>
+<a class="sourceLine" id="cb3-2" title="2">dat &lt;-<span class="st"> </span>cohort_unrelated[Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>DB_cond <span class="op">==</span><span class="st"> </span><span class="dv">50</span> <span class="op">&amp;</span><span class="st"> </span>LookType <span class="op">==</span><span class="st"> &quot;Cohort&quot;</span>, ]</a>
+<a class="sourceLine" id="cb3-3" title="3">dat</a>
+<a class="sourceLine" id="cb3-4" title="4"><span class="co">#&gt;      Subject Time DB_cond  Fixations LookType Group</span></a>
+<a class="sourceLine" id="cb3-5" title="5"><span class="co">#&gt;   1:       1    0      50 0.01136364   Cohort    50</span></a>
+<a class="sourceLine" id="cb3-6" title="6"><span class="co">#&gt;   2:       1    4      50 0.01136364   Cohort    50</span></a>
+<a class="sourceLine" id="cb3-7" title="7"><span class="co">#&gt;   3:       1    8      50 0.01136364   Cohort    50</span></a>
+<a class="sourceLine" id="cb3-8" title="8"><span class="co">#&gt;   4:       1   12      50 0.01136364   Cohort    50</span></a>
+<a class="sourceLine" id="cb3-9" title="9"><span class="co">#&gt;   5:       1   16      50 0.02272727   Cohort    50</span></a>
+<a class="sourceLine" id="cb3-10" title="10"><span class="co">#&gt;  ---                                               </span></a>
+<a class="sourceLine" id="cb3-11" title="11"><span class="co">#&gt; 497:       1 1984      50 0.02272727   Cohort    50</span></a>
+<a class="sourceLine" id="cb3-12" title="12"><span class="co">#&gt; 498:       1 1988      50 0.02272727   Cohort    50</span></a>
+<a class="sourceLine" id="cb3-13" title="13"><span class="co">#&gt; 499:       1 1992      50 0.02272727   Cohort    50</span></a>
+<a class="sourceLine" id="cb3-14" title="14"><span class="co">#&gt; 500:       1 1996      50 0.02272727   Cohort    50</span></a>
+<a class="sourceLine" id="cb3-15" title="15"><span class="co">#&gt; 501:       1 2000      50 0.02272727   Cohort    50</span></a></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb4-1" title="1"><span class="co">## See return value</span></a>
+<a class="sourceLine" id="cb4-2" title="2"><span class="kw">doubleGauss</span>(<span class="dt">dat =</span> dat, <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>, <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>, <span class="dt">concave =</span> <span class="ot">TRUE</span>)</a>
+<a class="sourceLine" id="cb4-3" title="3"><span class="co">#&gt; $formula</span></a>
+<a class="sourceLine" id="cb4-4" title="4"><span class="co">#&gt; Fixations ~ (Time &lt; mu) * (exp(-1 * (Time - mu)^2/(2 * sig1^2)) * </span></a>
+<a class="sourceLine" id="cb4-5" title="5"><span class="co">#&gt;     (ht - base1) + base1) + (mu &lt;= Time) * (exp(-1 * (Time - </span></a>
+<a class="sourceLine" id="cb4-6" title="6"><span class="co">#&gt;     mu)^2/(2 * sig2^2)) * (ht - base2) + base2)</span></a>
+<a class="sourceLine" id="cb4-7" title="7"><span class="co">#&gt; attr(,&quot;parnames&quot;)</span></a>
+<a class="sourceLine" id="cb4-8" title="8"><span class="co">#&gt; [1] &quot;mu&quot;    &quot;ht&quot;    &quot;sig1&quot;  &quot;sig2&quot;  &quot;base1&quot; &quot;base2&quot;</span></a>
+<a class="sourceLine" id="cb4-9" title="9"><span class="co">#&gt; </span></a>
+<a class="sourceLine" id="cb4-10" title="10"><span class="co">#&gt; $params</span></a>
+<a class="sourceLine" id="cb4-11" title="11"><span class="co">#&gt;           mu           ht         sig1         sig2        base1        base2 </span></a>
+<a class="sourceLine" id="cb4-12" title="12"><span class="co">#&gt; 428.00000000   0.21590909 152.00000000 396.00000000   0.01136364   0.02272727</span></a></code></pre></div>
+<p>We will now create an entirely new function that is not included in <code>bdots</code> to demonstrate that it works the same; the only change we will make is to substitute in the values for <code>y</code> and <code>time</code> without using <code>str2lang</code>. For our data set here, the corresponding values to <code>y</code> and <code>time</code> are <code>&quot;Fixations&quot;</code> and <code>&quot;Time&quot;</code>, respectively</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb5-1" title="1">doubleGauss2 &lt;-<span class="st"> </span><span class="cf">function</span> (dat, y, time, <span class="dt">params =</span> <span class="ot">NULL</span>, <span class="dt">concave =</span> <span class="ot">TRUE</span>, ...) {</a>
+<a class="sourceLine" id="cb5-2" title="2">  </a>
+<a class="sourceLine" id="cb5-3" title="3">  <span class="cf">if</span> (<span class="kw">is.null</span>(params)) {</a>
+<a class="sourceLine" id="cb5-4" title="4">    <span class="co">## Instead of defining our own, just reuse the one in bdots</span></a>
+<a class="sourceLine" id="cb5-5" title="5">    params &lt;-<span class="st"> </span>bdots<span class="op">:::</span><span class="kw">dgaussPars</span>(dat, y, time, concave)</a>
+<a class="sourceLine" id="cb5-6" title="6">  }</a>
+<a class="sourceLine" id="cb5-7" title="7">  <span class="cf">else</span> {</a>
+<a class="sourceLine" id="cb5-8" title="8">    <span class="cf">if</span> (<span class="kw">length</span>(params) <span class="op">!=</span><span class="st"> </span><span class="dv">6</span>) </a>
+<a class="sourceLine" id="cb5-9" title="9">      <span class="kw">stop</span>(<span class="st">&quot;doubleGauss requires 6 parameters be specified for refitting&quot;</span>)</a>
+<a class="sourceLine" id="cb5-10" title="10">    <span class="cf">if</span> (<span class="op">!</span><span class="kw">all</span>(<span class="kw">names</span>(params) <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;mu&quot;</span>, <span class="st">&quot;ht&quot;</span>, <span class="st">&quot;sig1&quot;</span>, <span class="st">&quot;sig2&quot;</span>, </a>
+<a class="sourceLine" id="cb5-11" title="11">                                  <span class="st">&quot;base1&quot;</span>, <span class="st">&quot;base2&quot;</span>))) {</a>
+<a class="sourceLine" id="cb5-12" title="12">      <span class="kw">stop</span>(<span class="st">&quot;doubleGauss parameters for refitting must be correctly labeled&quot;</span>)</a>
+<a class="sourceLine" id="cb5-13" title="13">    }</a>
+<a class="sourceLine" id="cb5-14" title="14">  }</a>
+<a class="sourceLine" id="cb5-15" title="15"></a>
+<a class="sourceLine" id="cb5-16" title="16">    <span class="co">## Here, we use Fixations and Time directly</span></a>
+<a class="sourceLine" id="cb5-17" title="17">    ff &lt;-<span class="st"> </span><span class="kw">bquote</span>(Fixations <span class="op">~</span><span class="st"> </span>(Time <span class="op">&lt;</span><span class="st"> </span>mu) <span class="op">*</span><span class="st"> </span>(<span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span> <span class="op">*</span><span class="st"> </span>(Time <span class="op">-</span><span class="st"> </span>mu)<span class="op">^</span><span class="dv">2</span> <span class="op">/</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb5-18" title="18"><span class="st">                  </span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>sig1<span class="op">^</span><span class="dv">2</span>)) <span class="op">*</span><span class="st"> </span>(ht <span class="op">-</span><span class="st"> </span>base1) <span class="op">+</span><span class="st"> </span>base1) <span class="op">+</span><span class="st"> </span>(mu <span class="op">&lt;=</span><span class="st"> </span>Time) <span class="op">*</span><span class="st"> </span></a>
+<a class="sourceLine" id="cb5-19" title="19"><span class="st">                  </span>(<span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span> <span class="op">*</span><span class="st"> </span>(Time <span class="op">-</span><span class="st"> </span>mu)<span class="op">^</span><span class="dv">2</span><span class="op">/</span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>sig2<span class="op">^</span><span class="dv">2</span>)) <span class="op">*</span><span class="st"> </span>(ht <span class="op">-</span><span class="st"> </span>base2) <span class="op">+</span><span class="st"> </span>base2))</a>
+<a class="sourceLine" id="cb5-20" title="20">    <span class="kw">return</span>(<span class="kw">list</span>(<span class="dt">formula =</span> ff, <span class="dt">params =</span> params))</a>
+<a class="sourceLine" id="cb5-21" title="21">}</a>
+<a class="sourceLine" id="cb5-22" title="22"></a>
+<a class="sourceLine" id="cb5-23" title="23">same_fit_different_day &lt;-<span class="st"> </span><span class="kw">bdotsFit</span>(<span class="dt">data =</span> cohort_unrelated,</a>
+<a class="sourceLine" id="cb5-24" title="24">                                   <span class="dt">subject =</span> <span class="st">&quot;Subject&quot;</span>,</a>
+<a class="sourceLine" id="cb5-25" title="25">                                   <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>,</a>
+<a class="sourceLine" id="cb5-26" title="26">                                   <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>,</a>
+<a class="sourceLine" id="cb5-27" title="27">                                   <span class="dt">group =</span> <span class="kw">c</span>(<span class="st">&quot;DB_cond&quot;</span>, <span class="st">&quot;LookType&quot;</span>),</a>
+<a class="sourceLine" id="cb5-28" title="28">                                   <span class="dt">curveType =</span> <span class="kw">doubleGauss2</span>(<span class="dt">concave =</span> <span class="ot">TRUE</span>),</a>
+<a class="sourceLine" id="cb5-29" title="29">                                   <span class="dt">cores =</span> <span class="dv">2</span>)</a></code></pre></div>
+<p>Seeds have not yet been implemented, so there is some possibility that the resulting parameters are slightly different; however, using the <code>coef</code> function, we can roughly confirm their equivalence</p>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb6-1" title="1"><span class="co">## Original fit</span></a>
+<a class="sourceLine" id="cb6-2" title="2"><span class="kw">head</span>(<span class="kw">coef</span>(fit))</a>
+<a class="sourceLine" id="cb6-3" title="3"><span class="co">#&gt;            mu        ht     sig1     sig2        base1      base2</span></a>
+<a class="sourceLine" id="cb6-4" title="4"><span class="co">#&gt; [1,] 429.7595 0.1985978 159.8869 314.6389  0.009709831 0.03376106</span></a>
+<a class="sourceLine" id="cb6-5" title="5"><span class="co">#&gt; [2,] 634.9292 0.2635044 303.8080 215.3845 -0.020636088 0.02892360</span></a>
+<a class="sourceLine" id="cb6-6" title="6"><span class="co">#&gt; [3,] 647.0655 0.2543769 518.9633 255.9870 -0.213087542 0.01368196</span></a>
+<a class="sourceLine" id="cb6-7" title="7"><span class="co">#&gt; [4,] 723.0547 0.2582110 392.9495 252.9384 -0.054826156 0.03197291</span></a>
+<a class="sourceLine" id="cb6-8" title="8"><span class="co">#&gt; [5,] 501.4822 0.2247729 500.8480 158.4180 -0.331679043 0.02522681</span></a>
+<a class="sourceLine" id="cb6-9" title="9"><span class="co">#&gt; [6,] 460.7152 0.3067659 382.7321 166.0833 -0.243308563 0.03992168</span></a>
+<a class="sourceLine" id="cb6-10" title="10"></a>
+<a class="sourceLine" id="cb6-11" title="11"><span class="co">## &quot;New&quot; fit</span></a>
+<a class="sourceLine" id="cb6-12" title="12"><span class="kw">head</span>(<span class="kw">coef</span>(same_fit_different_day))</a>
+<a class="sourceLine" id="cb6-13" title="13"><span class="co">#&gt;            mu        ht     sig1     sig2       base1      base2</span></a>
+<a class="sourceLine" id="cb6-14" title="14"><span class="co">#&gt; [1,] 424.0375 0.1984991 154.2071 319.4739  0.01136451 0.03363619</span></a>
+<a class="sourceLine" id="cb6-15" title="15"><span class="co">#&gt; [2,] 634.8088 0.2635148 303.6642 215.4312 -0.02058572 0.02893337</span></a>
+<a class="sourceLine" id="cb6-16" title="16"><span class="co">#&gt; [3,] 646.9447 0.2544417 517.6521 255.9967 -0.21165103 0.01357058</span></a>
+<a class="sourceLine" id="cb6-17" title="17"><span class="co">#&gt; [4,] 723.0862 0.2582117 393.0044 252.9036 -0.05485265 0.03197495</span></a>
+<a class="sourceLine" id="cb6-18" title="18"><span class="co">#&gt; [5,] 501.6136 0.2247893 500.9487 158.3112 -0.33216904 0.02522936</span></a>
+<a class="sourceLine" id="cb6-19" title="19"><span class="co">#&gt; [6,] 460.7371 0.3067971 382.5232 165.9932 -0.24285942 0.03993349</span></a></code></pre></div>
 
 
 

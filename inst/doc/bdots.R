@@ -78,7 +78,7 @@ boot2 <- bdotsBoot(formula = diffs(Fixation, LookType(Cohort, Unrelated_Cohort))
                    padj = "oleson",
                    cores = 2)
 
-## -----------------------------------------------------------------------------
+## ---- fig.align='center', fig.width = 8, fig.height=6-------------------------
 summary(boot1)
 
 plot(boot1)
