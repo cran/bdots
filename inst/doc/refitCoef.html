@@ -25,7 +25,15 @@
     </style>
 
 
-<style type="text/css">code{white-space: pre;}</style>
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
 <style type="text/css" data-origin="pandoc">
 a.sourceLine { display: inline-block; line-height: 1.25; }
 a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
@@ -327,8 +335,7 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb2-9" title="9">                <span class="dt">cores =</span> <span class="dv">2</span>,</a>
 <a class="sourceLine" id="cb2-10" title="10">                <span class="dt">verbose =</span> <span class="ot">FALSE</span>)</a>
 <a class="sourceLine" id="cb2-11" title="11"></a>
-<a class="sourceLine" id="cb2-12" title="12">refit &lt;-<span class="st"> </span><span class="kw">bdotsRefit</span>(fit, <span class="dt">quickRefit =</span> <span class="ot">TRUE</span>, <span class="dt">fitCode =</span> <span class="dv">5</span>)</a>
-<a class="sourceLine" id="cb2-13" title="13"><span class="co">#&gt; All observations fitCode greater than 5. Nothing to refit :)</span></a></code></pre></div>
+<a class="sourceLine" id="cb2-12" title="12">refit &lt;-<span class="st"> </span><span class="kw">bdotsRefit</span>(fit, <span class="dt">quickRefit =</span> <span class="ot">TRUE</span>, <span class="dt">fitCode =</span> <span class="dv">5</span>)</a></code></pre></div>
 <p>From this, we can create an appropriate <code>data.table</code> that can be used in a later session</p>
 <div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><a class="sourceLine" id="cb3-1" title="1">parDT &lt;-<span class="st"> </span><span class="kw">coefWriteout</span>(refit)</a>
 <a class="sourceLine" id="cb3-2" title="2"><span class="kw">head</span>(parDT)</a>

@@ -16,6 +16,11 @@ logistic <- function(dat, y, time, params = NULL, ...) {
     time <- dat[[time]]
     y <- dat[[y]]
 
+    ## Remove cases with zero variance
+    if (var(y) == 0) {
+      return(NULL)
+    }
+
     mini <- min(y)
     peak <- max(y)
     r <- (peak - mini)
@@ -38,6 +43,10 @@ logistic <- function(dat, y, time, params = NULL, ...) {
     if (!all(names(params) %in% c("mini", "peak", "slope", "cross"))) {
       stop("logistic parameters for refitting must be correctly labeled")
     }
+  }
+  ## Return NA list if var(y) is 0
+  if (is.null(params)) {
+    return(NULL)
   }
   y <- str2lang(y)
   time <- str2lang(time)
@@ -78,6 +87,10 @@ doubleGauss <- function(dat, y, time, params = NULL, concave = TRUE, ...) {
       stop("doubleGauss parameters for refitting must be correctly labeled")
     }
   }
+  ## Return NA list if var(y) is 0
+  if (is.null(params)) {
+    return(NULL)
+  }
 
   y <- str2lang(y)
   time <- str2lang(time)
@@ -93,6 +106,11 @@ doubleGauss <- function(dat, y, time, params = NULL, concave = TRUE, ...) {
 dgaussPars <- function(dat, y, time, conc) {
   time <- dat[[time]]
   y <- dat[[y]]
+
+  ## Remove cases with zero variance
+  if (var(y) == 0) {
+    return(NULL)
+  }
 
   mu <- ifelse(conc, time[which.max(y)], time[which.min(y)])
   ht <- ifelse(conc, max(y), min(y))
@@ -120,7 +138,7 @@ dgaussPars <- function(dat, y, time, conc) {
 
 #' Polynomial curve function for nlme
 #'
-#' Logistic function used in fitting nlme curve for observations
+#' Polynomial function used in fitting nlme curve for observations
 #'
 #' @param dat subject data to be used
 #' @param y outcome variable
@@ -139,6 +157,10 @@ dgaussPars <- function(dat, y, time, conc) {
 polynomial <- function(dat, y, time, degree, raw = TRUE, params = NULL, ...) {
 
   polyPars <- function(dat, y, time, degree, raw) {
+    ## Remove cases with zero variance
+    if (var(dat[[y]]) == 0) {
+      return(NULL)
+    }
     pp <- lm(dat[[y]] ~ poly(dat[[time]], degree = degree, raw = raw))
     setNames(coef(pp), c(paste0("beta", seq(degree + 1L))))
   }
@@ -151,6 +173,10 @@ polynomial <- function(dat, y, time, degree, raw = TRUE, params = NULL, ...) {
       stop("polynomial parameters must be labeled beta1, ..., beta[degree + 1]")
     }
   }
+  ## Return NA list if var(y) is 0
+  if (is.null(params)) {
+    return(NULL)
+  }
 
   time_names <- paste0("I(Time^", seq(degree + 1L) - 1L , ")")
 
@@ -161,3 +187,155 @@ polynomial <- function(dat, y, time, degree, raw = TRUE, params = NULL, ...) {
   attr(ff, "parnames") <- names(params)
   return(list(formula = ff, params = params))
 }
+
+
+#' Linear curve function
+#'
+#' Linear function used in fitting nlme curve for observations
+#'
+#' @param dat subject data to be used
+#' @param y outcome variable
+#' @param time time variable
+#' @param params \code{NULL} unless user wants to specify starting parameters for gnls
+#' @param ... just in case
+#'
+#' @details Don't use this function please
+#'
+#' @details \code{y ~ slope*time + intercept}
+#' @export
+linear <- function(dat, y, time, params = NULL, ...) {
+  linearPars <- function(dat, y, time, ...) {
+    time <- dat[[time]]
+    y <- dat[[y]]
+
+    ## Remove cases with zero variance
+    if (var(y) == 0) {
+      return(NULL)
+    }
+    bb <- min(y)
+    mm <- (max(y) - bb) / max(time)
+
+    return(c(intercept = bb, slope = mm))
+  }
+
+  if (is.null(params)) {
+    params <- linearPars(dat, y, time)
+  } else {
+    if (length(params) != 2) stop("linear requires 2 parameters be specified for refitting")
+    if (!all(names(params) %in% c("intercept", "slope"))) {
+      stop("linear parameters for refitting must be correctly labeled")
+    }
+  }
+  ## Return NA list if var(y) is 0
+  if (is.null(params)) {
+    return(NULL)
+  }
+  y <- str2lang(y)
+  time <- str2lang(time)
+  ff <- bquote(.(y) ~ slope * .(time) + intercept)
+  attr(ff, "parnames") <- names(params)
+  return(list(formula = ff, params = params))
+}
+
+
+#' Exponential curve function
+#'
+#' Exponential function used in fitting nlme curve for observations
+#'
+#' @param dat subject data to be used
+#' @param y outcome variable
+#' @param time time variable
+#' @param params \code{NULL} unless user wants to specify starting parameters for gnls
+#' @param ... just in case
+#'
+#' @details Don't use this function please
+#'
+#' @details \code{y ~ x_0 exp(k beta)}
+#' @export
+expCurve <- function(dat, y, time, params = NULL, ...) {
+  estExpPars <- function(dat, y, time) {
+    tt <- lm(log(dat[[y]]) ~ dat[[time]])
+    x0 <- exp(coef(tt)[1])
+    k <- coef(tt)[2]
+    names(x0) <- names(k) <- NULL
+    return(c(x0 = x0, k = k))
+  }
+
+  if (any(dat[[y]] <= 0)) {
+    message("Subjects with values <= 0 will not be fit")
+    return(NULL)
+  }
+
+  if (is.null(params)) {
+    params <- estExpPars(dat, y, time)
+  } else {
+    # put checks here
+  }
+  y <- str2lang(y)
+  time <- str2lang(time)
+  ff <- bquote(.(y) ~ x0 * exp(.(time) * k))
+  attr(ff, "parnames") <- names(params)
+  return(list(formula = ff, params = params))
+}
+
+
+#' ## -----------
+#'
+#' #' Logistic curve function for nlme
+#' #'
+#' #' DELETE THIS FUNCTION BEFORE GIT PUSH
+#' #'
+#' #' @param dat subject data to be used
+#' #' @param y outcome variable
+#' #' @param time time variable
+#' #' @param params \code{NULL} unless user wants to specify starting parameters for gnls
+#' #' @param ... just in case
+#' #'
+#' #' @details \code{y ~ mini + (peak - mini) / (1 + exp(4 * slope * (cross - (time)) / (peak - mini)))}
+#' #' @export
+#' logistic2 <- function(dat, y, time, params = NULL, ...) {
+#'
+#'   logisticPars <- function(dat, y, time, ...) {
+#'     dat[, looks := mean(looks), by = starttime]
+#'     dat <- unique(dat)
+#'     time <- dat[[time]]
+#'     y <- dat[[y]]
+#'
+#'     ## Remove cases with zero variance
+#'     if (var(y) == 0) {
+#'       return(NULL)
+#'     }
+#'
+#'     mini <- min(y)
+#'     peak <- max(y)
+#'     r <- (peak - mini)
+#'     cross <- time[which.min(abs(0.5*r - y))]
+#'
+#'     # slope
+#'     q75 <- .75 * r + mini
+#'     q25 <- .25 * r + mini
+#'     time75 <- time[which.min(abs(q75 - y))]
+#'     time25 <- time[which.min(abs(q25 - y))]
+#'     slope <- (q75 - q25) / (time75 - time25)
+#'
+#'     return(c(mini = mini, peak = peak, slope = slope, cross = cross))
+#'   }
+#'
+#'   if (is.null(params)) {
+#'     params <- logisticPars(dat, y, time)
+#'   } else {
+#'     if (length(params) != 4) stop("logistic requires 4 parameters be specified for refitting")
+#'     if (!all(names(params) %in% c("mini", "peak", "slope", "cross"))) {
+#'       stop("logistic parameters for refitting must be correctly labeled")
+#'     }
+#'   }
+#'   ## Return NA list if var(y) is 0
+#'   if (is.null(params)) {
+#'     return(NULL)
+#'   }
+#'   y <- str2lang(y)
+#'   time <- str2lang(time)
+#'   ff <- bquote(.(y) ~ mini + (peak - mini) / (1 + exp(4 * slope * (cross - (.(time))) / (peak - mini))))
+#'   attr(ff, "parnames") <- names(params)
+#'   return(list(formula = ff, params = params))
+#' }

@@ -40,10 +40,15 @@ bdotsFitter <- function(dat, curveType, rho, numRefits = 0,
     formals(curveType)[[nn]] <- arggs[[nn]]
   }
   res <- curveType()
-  ff <- res[['formula']]
-  params <- res[['params']]
-  fit <- curveFitter(dat, ff, params, rho, numRefits, getCovOnly, ...)
 
+  ## This occurs in situation with var(y) == 0
+  if (is.null(res)) {
+    return(NULL)
+  } else {
+    ff <- res[['formula']]
+    params <- res[['params']]
+    fit <- curveFitter(dat, ff, params, rho, numRefits, getCovOnly, ...)
+  }
 
   ## Return DT for failed fit
   if (is.null(fit)) {
@@ -62,6 +67,7 @@ bdotsFitter <- function(dat, curveType, rho, numRefits = 0,
   SSE <- sum(resid(fit)^2)
   SSY <- sum((dat[[y]] - mean(dat[[y]]))^2)
   R2 <- 1 - SSE/SSY
+
 
   hasCor <- !is.null(fit$modelStruct$corStruct)
   fitCode <- 3L*(!hasCor) + 1L*(R2 < 0.95)*(R2 > 0.8) + 2L*(R2 < 0.8)
@@ -116,7 +122,6 @@ curveFitter <- function(dat, ff, params, rho, numRefits = 0, getCovOnly = NULL, 
         attempts <- numRefits
         while (attempts > 0 & is.null(fit)) {
           attempts <- attempts - 1
-          #params <- jitter(params)
           nudgeVal <- runif(length(params), -0.05, 0.05) * (numRefits - attempts)
           n_params <- params * (1 + nudgeVal)
           fit <- tryCatch(gnls(eval(ff), data = dat, start = n_params, correlation = corAR1(rho)),
@@ -141,10 +146,18 @@ curveFitter <- function(dat, ff, params, rho, numRefits = 0, getCovOnly = NULL, 
 
       ## As last resort, have potentially bad fit (also meaning no more NULL fitCode)
       if (is.null(fit)) {
-        fit <- gnls(eval(ff), start = params, data = dat,
-                    correlation = corAR1(rho),
-                    control = gnlsControl(maxIter = 0, nlsMaxIter = 0,
-                                          msMaxIter = 0, returnObject = TRUE))
+
+        ## This last resort should also be able to specify AR1 or not
+        if (rho) {
+          fit <- gnls(eval(ff), start = params, data = dat,
+                      correlation = corAR1(rho),
+                      control = gnlsControl(maxIter = 0, nlsMaxIter = 0,
+                                            msMaxIter = 0, returnObject = TRUE))
+        } else {
+          fit <- gnls(eval(ff), start = params, data = dat,
+                      control = gnlsControl(maxIter = 0, nlsMaxIter = 0,
+                                            msMaxIter = 0, returnObject = TRUE))
+        }
       }
     }
   }

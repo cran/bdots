@@ -25,7 +25,15 @@
     </style>
 
 
-<style type="text/css">code{white-space: pre;}</style>
+
+<style type="text/css">
+  code {
+    white-space: pre;
+  }
+  .sourceCode {
+    overflow: visible;
+  }
+</style>
 <style type="text/css" data-origin="pandoc">
 a.sourceLine { display: inline-block; line-height: 1.25; }
 a.sourceLine { pointer-events: none; color: inherit; text-decoration: inherit; }
@@ -336,17 +344,20 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb2-12" title="12"><span class="co">#&gt;             stop(&quot;doubleGauss parameters for refitting must be correctly labeled&quot;)</span></a>
 <a class="sourceLine" id="cb2-13" title="13"><span class="co">#&gt;         }</span></a>
 <a class="sourceLine" id="cb2-14" title="14"><span class="co">#&gt;     }</span></a>
-<a class="sourceLine" id="cb2-15" title="15"><span class="co">#&gt;     y &lt;- str2lang(y)</span></a>
-<a class="sourceLine" id="cb2-16" title="16"><span class="co">#&gt;     time &lt;- str2lang(time)</span></a>
-<a class="sourceLine" id="cb2-17" title="17"><span class="co">#&gt;     ff &lt;- bquote(.(y) ~ (.(time) &lt; mu) * (exp(-1 * (.(time) - </span></a>
-<a class="sourceLine" id="cb2-18" title="18"><span class="co">#&gt;         mu)^2/(2 * sig1^2)) * (ht - base1) + base1) + (mu &lt;= </span></a>
-<a class="sourceLine" id="cb2-19" title="19"><span class="co">#&gt;         .(time)) * (exp(-1 * (.(time) - mu)^2/(2 * sig2^2)) * </span></a>
-<a class="sourceLine" id="cb2-20" title="20"><span class="co">#&gt;         (ht - base2) + base2))</span></a>
-<a class="sourceLine" id="cb2-21" title="21"><span class="co">#&gt;     attr(ff, &quot;parnames&quot;) &lt;- names(params)</span></a>
-<a class="sourceLine" id="cb2-22" title="22"><span class="co">#&gt;     return(list(formula = ff, params = params))</span></a>
-<a class="sourceLine" id="cb2-23" title="23"><span class="co">#&gt; }</span></a>
-<a class="sourceLine" id="cb2-24" title="24"><span class="co">#&gt; &lt;bytecode: 0x55617fac2140&gt;</span></a>
-<a class="sourceLine" id="cb2-25" title="25"><span class="co">#&gt; &lt;environment: namespace:bdots&gt;</span></a></code></pre></div>
+<a class="sourceLine" id="cb2-15" title="15"><span class="co">#&gt;     if (is.null(params)) {</span></a>
+<a class="sourceLine" id="cb2-16" title="16"><span class="co">#&gt;         return(NULL)</span></a>
+<a class="sourceLine" id="cb2-17" title="17"><span class="co">#&gt;     }</span></a>
+<a class="sourceLine" id="cb2-18" title="18"><span class="co">#&gt;     y &lt;- str2lang(y)</span></a>
+<a class="sourceLine" id="cb2-19" title="19"><span class="co">#&gt;     time &lt;- str2lang(time)</span></a>
+<a class="sourceLine" id="cb2-20" title="20"><span class="co">#&gt;     ff &lt;- bquote(.(y) ~ (.(time) &lt; mu) * (exp(-1 * (.(time) - </span></a>
+<a class="sourceLine" id="cb2-21" title="21"><span class="co">#&gt;         mu)^2/(2 * sig1^2)) * (ht - base1) + base1) + (mu &lt;= </span></a>
+<a class="sourceLine" id="cb2-22" title="22"><span class="co">#&gt;         .(time)) * (exp(-1 * (.(time) - mu)^2/(2 * sig2^2)) * </span></a>
+<a class="sourceLine" id="cb2-23" title="23"><span class="co">#&gt;         (ht - base2) + base2))</span></a>
+<a class="sourceLine" id="cb2-24" title="24"><span class="co">#&gt;     attr(ff, &quot;parnames&quot;) &lt;- names(params)</span></a>
+<a class="sourceLine" id="cb2-25" title="25"><span class="co">#&gt;     return(list(formula = ff, params = params))</span></a>
+<a class="sourceLine" id="cb2-26" title="26"><span class="co">#&gt; }</span></a>
+<a class="sourceLine" id="cb2-27" title="27"><span class="co">#&gt; &lt;bytecode: 0x55bd33cf4c38&gt;</span></a>
+<a class="sourceLine" id="cb2-28" title="28"><span class="co">#&gt; &lt;environment: namespace:bdots&gt;</span></a></code></pre></div>
 <p>There are four things to note:</p>
 <ol style="list-style-type: decimal">
 <li><dl>
@@ -442,11 +453,11 @@ code > span.er { color: #a61717; background-color: #e3d2d2; }
 <a class="sourceLine" id="cb6-11" title="11"><span class="co">## &quot;New&quot; fit</span></a>
 <a class="sourceLine" id="cb6-12" title="12"><span class="kw">head</span>(<span class="kw">coef</span>(same_fit_different_day))</a>
 <a class="sourceLine" id="cb6-13" title="13"><span class="co">#&gt;            mu        ht     sig1     sig2       base1      base2</span></a>
-<a class="sourceLine" id="cb6-14" title="14"><span class="co">#&gt; [1,] 424.0375 0.1984991 154.2071 319.4739  0.01136451 0.03363619</span></a>
-<a class="sourceLine" id="cb6-15" title="15"><span class="co">#&gt; [2,] 634.8088 0.2635148 303.6642 215.4312 -0.02058572 0.02893337</span></a>
-<a class="sourceLine" id="cb6-16" title="16"><span class="co">#&gt; [3,] 646.9447 0.2544417 517.6521 255.9967 -0.21165103 0.01357058</span></a>
+<a class="sourceLine" id="cb6-14" title="14"><span class="co">#&gt; [1,] 424.0436 0.1984993 154.2098 319.4686  0.01136710 0.03363633</span></a>
+<a class="sourceLine" id="cb6-15" title="15"><span class="co">#&gt; [2,] 634.8088 0.2635148 303.6641 215.4312 -0.02058565 0.02893337</span></a>
+<a class="sourceLine" id="cb6-16" title="16"><span class="co">#&gt; [3,] 646.9445 0.2544418 517.6497 255.9968 -0.21164820 0.01357057</span></a>
 <a class="sourceLine" id="cb6-17" title="17"><span class="co">#&gt; [4,] 723.0862 0.2582117 393.0044 252.9036 -0.05485265 0.03197495</span></a>
-<a class="sourceLine" id="cb6-18" title="18"><span class="co">#&gt; [5,] 501.6136 0.2247893 500.9487 158.3112 -0.33216904 0.02522936</span></a>
+<a class="sourceLine" id="cb6-18" title="18"><span class="co">#&gt; [5,] 501.6133 0.2247893 500.9495 158.3113 -0.33217106 0.02522935</span></a>
 <a class="sourceLine" id="cb6-19" title="19"><span class="co">#&gt; [6,] 460.7371 0.3067971 382.5232 165.9932 -0.24285942 0.03993349</span></a></code></pre></div>
 
 

@@ -105,6 +105,11 @@ rbindlist.default <- function(x, ...) {
   data.table::rbindlist(x, ...)
 }
 
+#' @importFrom data.table rbindlist
+rbindlist.list <- function(x, ...) {
+  data.table::rbindlist(x, ...)
+}
+
 ## Not 100% sure I should include this
 #' rbindlist for bdotsObjects
 #'
@@ -114,7 +119,6 @@ rbindlist.default <- function(x, ...) {
 #' @param ... for compatability with data.table
 #'
 #'
-#' @export
 rbindlist.bdObjList <- function(x, ...) {
   oldAttr <- attributes(x[[1]])
   class(x) <- "list"

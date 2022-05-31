@@ -18,6 +18,9 @@
 
 \item{...}{ignore for now (other args to plot.generic)}
 }
+\value{
+This will return a list of all of the plots rendered.
+}
 \description{
 Plot individual fits or model fit parameters from an object of class
 'bdotsObj'. These functions are not very stable

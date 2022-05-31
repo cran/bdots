@@ -8,3 +8,17 @@
 - updated vignettes
 - added temporary `writeCSV` function to write out `bdotsBoot` curve information for plotting
 
+# bdots 05-03-2021
+- Fixes to choosing AR1 status during refit steps
+
+# bdots 07-29-2021
+- Major updates to fit, parameter, and bootstrap plots with ggplot2
+- Handle case in which observation has zero variance in outcome
+- Relaxed fit criteria in refitting step
+- Fixed bugs in `bdotsRefit` walkthrough
+
+# bdots 05-26-2022
+- Major updates to plotting functions
+- Added correlation function, `bdotsCorr`
+- Fixed bugs in `bdotsRefit`, added option to save/restore refit 
+- Added new curve functions
