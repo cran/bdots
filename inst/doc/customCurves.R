@@ -6,8 +6,14 @@ knitr::opts_chunk$set(
 
 ## ----setup, include = FALSE---------------------------------------------------
 library(bdots)
+# Make smaller for cran
+cohort_unrelated$Subject <- as.numeric(cohort_unrelated$Subject)
+cohort_unrelated <- as.data.table(cohort_unrelated)
+cohort_unrelated <- cohort_unrelated[Subject < 10, ]
 
 ## -----------------------------------------------------------------------------
+library(bdots)
+
 fit <- bdotsFit(data = cohort_unrelated,
                 subject = "Subject",
                 time = "Time",

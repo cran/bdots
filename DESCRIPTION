@@ -1,8 +1,8 @@
 Package: bdots
 Type: Package
 Title: Bootstrapped Differences of Time Series
-Version: 1.1.0
-Date: 2022-05-26
+Version: 1.2.0
+Date: 2022-11-10
 Author: Collin Nolte, Michael Seedorff, Jacob Oleson, Grant Brown,
         Joseph Cavanaugh, and Bob McMurray
 Maintainer: Collin Nolte <collin-nolte@uiowa.edu>
@@ -18,9 +18,9 @@ License: GPL-3 | file LICENSE
 URL: https://github.com/collinn/bdots
 NeedsCompilation: no
 Encoding: UTF-8
-RoxygenNote: 7.2.0
+RoxygenNote: 7.2.1
 Suggests: knitr, rmarkdown, tinytest
 VignetteBuilder: knitr, rmarkdown
-Packaged: 2022-05-31 18:31:13 UTC; collin
+Packaged: 2022-11-10 18:17:53 UTC; collin
 Repository: CRAN
-Date/Publication: 2022-05-31 22:20:23 UTC
+Date/Publication: 2022-11-10 19:40:02 UTC

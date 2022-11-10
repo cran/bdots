@@ -7,6 +7,12 @@ knitr::opts_chunk$set(
 ## ----setup--------------------------------------------------------------------
 library(bdots)
 
+## ---- include=FALSE-----------------------------------------------------------
+# Make smaller for cran
+cohort_unrelated$Subject <- as.numeric(cohort_unrelated$Subject)
+cohort_unrelated <- as.data.table(cohort_unrelated)
+cohort_unrelated <- cohort_unrelated[Subject < 10, ]
+
 ## -----------------------------------------------------------------------------
 head(cohort_unrelated)
 
