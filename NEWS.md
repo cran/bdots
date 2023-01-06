@@ -1,8 +1,5 @@
-# bdots 11-10-2022
-- Subset data in vignettes for computational time constraints in cran submission
-
-# bdots 09-29-2022
-- Significant changes to bootstrap algorithm giving better coverage of true distribution
+# bdots 01-06-2023
+- temporary rollback to address new bootstrapping function for paired observations
 
 # bdots 07-25-2022
 - Time values no longer need to be identical between subjects for correct plotting
@@ -32,5 +29,4 @@
 
 # bdots 03-02-2021
 - Ready for launch!
-
 

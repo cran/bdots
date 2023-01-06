@@ -27,7 +27,7 @@
 #' values of v_i will be implied by the group with which they are associated.
 #'
 #' For example, if we have groups \code{vehicle} and \code{color}, we could specify
-#' that we are interested in all red cars and trucks with the expression
+#' that we are interested in all blue cars and trucks with the expression
 #' \code{vehicle(car, truck) + color(red)}.
 #'
 #' ## Formula
@@ -72,7 +72,7 @@
 #' As our primary object of interest here is not the difference in outcome itself, but the difference
 #' of the outcome within two groups, the LHS of the formula is written
 #' \code{diffs(y, Group1(val1, val2))}, where Group1 is the innerGroup. The RHS
-#' is then used to specify the groups of which we want to take the outer difference of. The
+#' is then used to specify the groups of which we want to take the inner difference of. The
 #' syntax here is the same as above. Together, then, the formula looks like
 #'
 #' \code{diffs(y, Group1(val1, val2)) ~ Group2(val1, val2)}
@@ -108,47 +108,37 @@
 #'
 #' @import data.table
 #' @export
+
 bdotsBoot <- function(formula,
                       bdObj,
                       Niter = 1000,
                       alpha = 0.05,
                       padj = "oleson",
                       cores = 0, ...) {
-  
+
   if (cores < 1) cores <- detectCores()/2
-  
+
   if (any(bdObj[['fitCode']] == 6)) {
     warning("Some observations had NULL gnls fits. These and their pairs will be removed")
     bdObj <- bdRemove(bdObj, fitCode = 6, removePairs = TRUE)
   }
-  
+
   prs <- bootParser(formula, bdObj)
   bdObj <- bootGroupSubset(prs, bdObj)
   innerDiff <- prs[["innerDiff"]] # unnamed char vec
   outerDiff <- prs[["outerDiff"]] # unnamed char vec
-  
+
   curveGrps <- setNames(prs[['subargs']], prs[['subnames']])
+
   curveFun <- makeCurveFun(bdObj)
-  
-  ## Next, we want to get a bootstrapped distribution for each of the groups
-  splitGroups <- split(bdObj, by = c(innerDiff, outerDiff)) # ok even if null
-  
-  ## Make this parallel (maybe later)
-  if (Sys.info()['sysname'] == "Darwin") {
-    cl <- makePSOCKcluster(cores, setup_strategy = "sequential")
-  } else {
-    cl <- makePSOCKcluster(cores)
-  }
-  invisible(clusterEvalQ(cl, {library(bdots)}))
-  groupDists <- parLapply(cl, splitGroups, getBootDist, b = Niter)
-  
-  stopCluster(cl)
-  
-  ## Next, we need to make inner/outer diff list
-  # (ideally matching old bdots, at least for now)
-  curveList <- createCurveList(groupDists, prs, splitGroups)
+
+  curveList <- curveBooter(bdObj,
+                           outerDiff = outerDiff,
+                           innerDiff = innerDiff,
+                           N.iter = Niter,
+                           curveFun = curveFun)
   ip <- curveList[['diff']][['paired']]
-  
+
   res <- alphaAdjust(curveList, padj, alpha, cores)
   pval <- res[['pval']]
   rho <- res[['rho']]
@@ -157,7 +147,7 @@ bdotsBoot <- function(formula,
   time <- attr(bdObj, "time")
   sigTime <- bucket(adjpval <= alpha, time)
   dod <- ifelse(is.null(innerDiff), FALSE, TRUE)
-  
+
   ## maybe consider keeping ancillary data in list, i.e., res.
   structure(class = "bdotsBootObj",
             .Data = list(curveList = curveList,
@@ -175,4 +165,11 @@ bdotsBoot <- function(formula,
             call = match.call(),
             bdObjAttr = attributes(bdObj))
 }
+
+
+
+
+
+
+
 

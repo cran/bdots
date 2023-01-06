@@ -141,30 +141,30 @@ refit &lt;-<span class="st"> </span><span class="kw">bdotsRefit</span>(fit, <spa
 <p>From this, we can create an appropriate <code>data.table</code> that can be used in a later session</p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">parDT &lt;-<span class="st"> </span><span class="kw">coefWriteout</span>(refit)
 <span class="kw">head</span>(parDT)
-<span class="co">#&gt;    Subject Group LookType       mu        ht     sig1     sig2        base1</span>
-<span class="co">#&gt; 1:       1    50   Cohort 429.7595 0.1985978 159.8869 314.6389  0.009709772</span>
-<span class="co">#&gt; 2:       1    65   Cohort 634.9292 0.2635044 303.8081 215.3845 -0.020636092</span>
-<span class="co">#&gt; 3:       2    50   Cohort 647.0655 0.2543769 518.9632 255.9871 -0.213087597</span>
-<span class="co">#&gt; 4:       2    65   Cohort 723.0551 0.2582110 392.9509 252.9381 -0.054827082</span>
-<span class="co">#&gt; 5:       3    50   Cohort 501.4843 0.2247729 500.8605 158.4164 -0.331698893</span>
-<span class="co">#&gt; 6:       3    65   Cohort 460.7152 0.3067659 382.7323 166.0833 -0.243308940</span>
+<span class="co">#&gt;    Subject Group LookType       mu        ht      sig1     sig2        base1</span>
+<span class="co">#&gt; 1:       1    50   Cohort 429.7595 0.1985978  159.8869 314.6389  0.009709772</span>
+<span class="co">#&gt; 2:       1    65   Cohort 634.9292 0.2635044  303.8081 215.3845 -0.020636092</span>
+<span class="co">#&gt; 3:       2    50   Cohort 647.0655 0.2543769  518.9632 255.9871 -0.213087597</span>
+<span class="co">#&gt; 4:       2    65   Cohort 723.0551 0.2582110  392.9509 252.9381 -0.054827082</span>
+<span class="co">#&gt; 5:       3    50   Cohort 501.4843 0.2247729  500.8605 158.4164 -0.331698893</span>
+<span class="co">#&gt; 6:       3    65   Cohort 485.5232 0.3111034 1268.8384 115.2930 -4.072126219</span>
 <span class="co">#&gt;         base2</span>
 <span class="co">#&gt; 1: 0.03376106</span>
 <span class="co">#&gt; 2: 0.02892360</span>
 <span class="co">#&gt; 3: 0.01368195</span>
 <span class="co">#&gt; 4: 0.03197292</span>
 <span class="co">#&gt; 5: 0.02522686</span>
-<span class="co">#&gt; 6: 0.03992168</span></code></pre></div>
+<span class="co">#&gt; 6: 0.04518018</span></code></pre></div>
 <p>It's important that columns are included that match the unique identifying columns in our <code>bdotsObj</code>, and that the parameters match the coefficients used from <code>bdotsFit</code></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Subject, Group, and LookType
 <span class="kw">head</span>(refit)
-<span class="co">#&gt;    Subject Group LookType        fit        R2   AR1 fitCode</span>
-<span class="co">#&gt; 1:       1    50   Cohort &lt;gnls[18]&gt; 0.9697202  TRUE       0</span>
-<span class="co">#&gt; 2:       1    65   Cohort &lt;gnls[18]&gt; 0.9804901  TRUE       0</span>
-<span class="co">#&gt; 3:       2    50   Cohort &lt;gnls[18]&gt; 0.9811708  TRUE       0</span>
-<span class="co">#&gt; 4:       2    65   Cohort &lt;gnls[18]&gt; 0.9697466  TRUE       0</span>
-<span class="co">#&gt; 5:       3    50   Cohort &lt;gnls[18]&gt; 0.9761906  TRUE       0</span>
-<span class="co">#&gt; 6:       3    65   Cohort &lt;gnls[18]&gt; 0.9534922 FALSE       3</span>
+<span class="co">#&gt;    Subject Group LookType        fit        R2  AR1 fitCode</span>
+<span class="co">#&gt; 1:       1    50   Cohort &lt;gnls[18]&gt; 0.9697202 TRUE       0</span>
+<span class="co">#&gt; 2:       1    65   Cohort &lt;gnls[18]&gt; 0.9804901 TRUE       0</span>
+<span class="co">#&gt; 3:       2    50   Cohort &lt;gnls[18]&gt; 0.9811708 TRUE       0</span>
+<span class="co">#&gt; 4:       2    65   Cohort &lt;gnls[18]&gt; 0.9697466 TRUE       0</span>
+<span class="co">#&gt; 5:       3    50   Cohort &lt;gnls[18]&gt; 0.9761906 TRUE       0</span>
+<span class="co">#&gt; 6:       3    65   Cohort &lt;gnls[18]&gt; 0.9448814 TRUE       1</span>
 
 ## doubleGauss pars
 <span class="kw">colnames</span>(<span class="kw">coef</span>(refit))
