@@ -1,5 +1,17 @@
-# bdots 01-06-2023
-- temporary rollback to address new bootstrapping function for paired observations
+# bdots 6-10-2025 (v 2.0)
+- Change of name and some arguments to all major functions for brevity and clarification (see vignettes)
+- Bootstrapping algorithm changed with major implications for prior users (https://arxiv.org/abs/2503.17495)
+- Fixed errors in refitting process
+- Move data.table from Imports to Depends
+- Permutation testing now available as alternative to bootstrap and alpha adjustment
+- Refitting can be done with indices or logical expressions instead of fitCodes
+
+
+# bdots 11-10-2022
+- Subset data in vignettes for computational time constraints in cran submission
+
+# bdots 09-29-2022
+- Significant changes to bootstrap algorithm giving better coverage of true distribution
 
 # bdots 07-25-2022
 - Time values no longer need to be identical between subjects for correct plotting
@@ -29,4 +41,5 @@
 
 # bdots 03-02-2021
 - Ready for launch!
+
 

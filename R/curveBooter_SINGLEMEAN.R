@@ -3,14 +3,16 @@
 # and potentially complicated
 # need to revist for potential simplication.
 
-curveBooter <- function(Obj, outerDiff, innerDiff = NULL, N.iter, curveFun) {
+# _sm designation means its for single mean assumptions
+
+curveBooter_sm <- function(Obj, outerDiff, innerDiff = NULL, N.iter, curveFun) {
 
   if (!is.null(innerDiff)) {
     obj <- split.bdotsObj(Obj, by = outerDiff, drop = TRUE)
-    res <- lapply(obj, curveBooter, outerDiff = innerDiff,
+    res <- lapply(obj, curveBooter_sm, outerDiff = innerDiff,
                   N.iter = N.iter, curveFun = curveFun)
 
-    diffList <- makeOuterDiffList(res, obj)
+    diffList <- makeOuterDiffList_sm(res, obj)
 
     return(structure(.Data = setNames(c(res, list(diffList)),
                                c(names(res), "diff")),
@@ -40,10 +42,10 @@ curveBooter <- function(Obj, outerDiff, innerDiff = NULL, N.iter, curveFun) {
   }
 
   ## class bdCurveList
-  curveList <- makeCurveList(meanMat, curveFun, oP)
+  curveList <- makeCurveList_sm(meanMat, curveFun, oP)
 
   ## Class bdDiffList
-  diffList <- makeInnerDiffList(curveList, oP)
+  diffList <- makeInnerDiffList_sm(curveList, oP)
 
   structure(.Data = setNames(c(curveList, list(diffList)),
                              c(unique(Obj[[outerDiff]]), "diff")),
@@ -59,7 +61,7 @@ curveBooter <- function(Obj, outerDiff, innerDiff = NULL, N.iter, curveFun) {
 
 # takes list of meanMatrix for each group (from bdotsBooter),
 # and a numeric vec with timeName attributes (from original call)
-makeCurveList <- function(meanMat, curveFun, oP) {
+makeCurveList_sm <- function(meanMat, curveFun, oP) {
   time <- attr(oP[[1]], "time")
   timeName <- attr(oP[[1]], "call")$time
 
@@ -84,7 +86,7 @@ makeCurveList <- function(meanMat, curveFun, oP) {
 
 
 ## Make diffList from curveList
-makeInnerDiffList <- function(curveList, oP) {
+makeInnerDiffList_sm <- function(curveList, oP) {
   diffList <- Map(function(x, y) {
     y - x
   }, curveList[[1]], curveList[[2]])
@@ -103,7 +105,7 @@ makeInnerDiffList <- function(curveList, oP) {
 
 
 ## Join and take diff of two inner diffs
-makeOuterDiffList <- function(res, obj) {
+makeOuterDiffList_sm <- function(res, obj) {
   res <- unlist(res, recursive = FALSE)
   idx <- grep("diff", names(res))
   if (length(idx) != 2L) stop("something weird in curveBooter. Contact author")
@@ -129,4 +131,47 @@ makeOuterDiffList <- function(res, obj) {
   diffList$paired <- ip
   structure(.Data = diffList,
             class = c("bdOuterDiffList", "bdDiffList"))
+}
+
+## bdotsBooter
+# Takes subset dat with iter and corMat, returns
+# More specifically, it takes a bdotsObj
+# N.iter x npars matrix of random draws
+
+# Notes
+## bdotsBooter
+# This will have at most two curves, for when things need
+# to be bivariate normal. It will also have an argument for
+# correlation coefficient. It does not need to know diffGroup or fitGroup
+# it only needs to know correlated or not
+## The bivariate normal matrix is going to always be problematic
+# because var for base1, base2, ht are nearly 0 (widely different scales than mu, sig1, sig2)
+# just look at kappa(sig11)
+# for now, I will leave it. I  will try to come up with my own solution before
+# giving this to jake
+## very much same issue with logistic (cross is HUGE)
+#' @import mvtnorm
+bdotsBooter <- function(bdo, N.iter, corMat = NULL) {
+
+  ## for now
+  if (nrow(bdo) > 2) stop("something weird in bdotsBooter")
+
+  mm <- coef(bdo)
+  ## Can only be one or two (will this be always true?)
+  if (!is.null(corMat)) {
+    sig11 <- getVarMat(bdo[1, ])
+    sig22 <- getVarMat(bdo[2, ])
+    sig12 <- 0 * corMat %*% sqrt((diag(sig11)) %*% t(diag(sig22)))
+    sig <- cbind(rbind(sig11, sig12), rbind(t(sig12), sig22))
+    # ee <- eigen(sig)$values
+    # ll <- min(abs(ee))/max(abs(ee))
+    # sig <- Matrix::nearPD(sig, keepDiag = TRUE, eig.tol = ll*1e-2, maxit = 1e7)$mat
+    pars <- mvtnorm::rmvnorm(N.iter, mean = c(t(mm)), sigma = sig)
+  } else {
+    sig <- getVarMat(bdo)
+    mm <- coef(bdo)
+    pars <- mvtnorm::rmvnorm(N.iter, mm, sigma = sig)
+  }
+  colnames(pars) <- rep(colnames(mm), ncol(pars)/ncol(mm))
+  pars
 }

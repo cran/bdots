@@ -14,6 +14,35 @@
 
 <title>Refit with Saved Parameters</title>
 
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -35,41 +64,68 @@
   }
 </style>
 <style type="text/css" data-origin="pandoc">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 
 </style>
 <script>
@@ -104,7 +160,187 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
 
 
 
@@ -122,68 +358,74 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 <div id="overview" class="section level2">
 <h2>Overview</h2>
-<p>This vignette walks through using a text file of previously fit model parameters to use in the <code>bdotsRefit</code> function. This is convenient if you have already gone through the refitting process and would like to save/load the refitted parameters in a new session.</p>
-<p>To demonstate this process, we start with fitting a set of curves to our data</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bdots)
-
-fit &lt;-<span class="st"> </span><span class="kw">bdotsFit</span>(<span class="dt">data =</span> cohort_unrelated,
-                <span class="dt">subject =</span> <span class="st">&quot;Subject&quot;</span>,
-                <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>,
-                <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>,
-                <span class="dt">group =</span> <span class="kw">c</span>(<span class="st">&quot;Group&quot;</span>, <span class="st">&quot;LookType&quot;</span>),
-                <span class="dt">curveType =</span> <span class="kw">doubleGauss</span>(<span class="dt">concave =</span> <span class="ot">TRUE</span>),
-                <span class="dt">cor =</span> <span class="ot">TRUE</span>,
-                <span class="dt">numRefits =</span> <span class="dv">2</span>,
-                <span class="dt">cores =</span> <span class="dv">2</span>,
-                <span class="dt">verbose =</span> <span class="ot">FALSE</span>)
-
-refit &lt;-<span class="st"> </span><span class="kw">bdotsRefit</span>(fit, <span class="dt">quickRefit =</span> <span class="ot">TRUE</span>, <span class="dt">fitCode =</span> <span class="dv">5</span>)</code></pre></div>
+<p>This vignette walks through using a text file of previously fit model parameters to use in the <code>brefit</code> function. This is convenient if you have already gone through the refitting process and would like to save/load the refitted parameters in a new session.</p>
+<p>To demonstrate this process, we start with fitting a set of curves to our data</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">library</span>(bdots)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a>fit &lt;-<span class="st"> </span><span class="kw">bfit</span>(<span class="dt">data =</span> cohort_unrelated,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a>            <span class="dt">subject =</span> <span class="st">&quot;Subject&quot;</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>            <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>            <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a>            <span class="dt">group =</span> <span class="kw">c</span>(<span class="st">&quot;Group&quot;</span>, <span class="st">&quot;LookType&quot;</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a>            <span class="dt">curveFun =</span> <span class="kw">doubleGauss</span>(<span class="dt">concave =</span> <span class="ot">TRUE</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true"></a>            <span class="dt">cor =</span> <span class="ot">TRUE</span>,</span>
+<span id="cb1-10"><a href="#cb1-10" aria-hidden="true"></a>            <span class="dt">numRefits =</span> <span class="dv">2</span>,</span>
+<span id="cb1-11"><a href="#cb1-11" aria-hidden="true"></a>            <span class="dt">cores =</span> <span class="dv">2</span>,</span>
+<span id="cb1-12"><a href="#cb1-12" aria-hidden="true"></a>            <span class="dt">verbose =</span> <span class="ot">FALSE</span>)</span>
+<span id="cb1-13"><a href="#cb1-13" aria-hidden="true"></a></span>
+<span id="cb1-14"><a href="#cb1-14" aria-hidden="true"></a>refit &lt;-<span class="st"> </span><span class="kw">brefit</span>(fit, <span class="dt">quickRefit =</span> <span class="ot">TRUE</span>, <span class="dt">fitCode =</span> <span class="dv">5</span>)</span>
+<span id="cb1-15"><a href="#cb1-15" aria-hidden="true"></a><span class="co">#&gt; All observations fitCode greater than 5. Nothing to refit :)</span></span></code></pre></div>
 <p>From this, we can create an appropriate <code>data.table</code> that can be used in a later session</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">parDT &lt;-<span class="st"> </span><span class="kw">coefWriteout</span>(refit)
-<span class="kw">head</span>(parDT)
-<span class="co">#&gt;    Subject Group LookType       mu        ht      sig1     sig2        base1</span>
-<span class="co">#&gt; 1:       1    50   Cohort 429.7595 0.1985978  159.8869 314.6389  0.009709772</span>
-<span class="co">#&gt; 2:       1    65   Cohort 634.9292 0.2635044  303.8081 215.3845 -0.020636092</span>
-<span class="co">#&gt; 3:       2    50   Cohort 647.0655 0.2543769  518.9632 255.9871 -0.213087597</span>
-<span class="co">#&gt; 4:       2    65   Cohort 723.0551 0.2582110  392.9509 252.9381 -0.054827082</span>
-<span class="co">#&gt; 5:       3    50   Cohort 501.4843 0.2247729  500.8605 158.4164 -0.331698893</span>
-<span class="co">#&gt; 6:       3    65   Cohort 485.5232 0.3111034 1268.8384 115.2930 -4.072126219</span>
-<span class="co">#&gt;         base2</span>
-<span class="co">#&gt; 1: 0.03376106</span>
-<span class="co">#&gt; 2: 0.02892360</span>
-<span class="co">#&gt; 3: 0.01368195</span>
-<span class="co">#&gt; 4: 0.03197292</span>
-<span class="co">#&gt; 5: 0.02522686</span>
-<span class="co">#&gt; 6: 0.04518018</span></code></pre></div>
-<p>It's important that columns are included that match the unique identifying columns in our <code>bdotsObj</code>, and that the parameters match the coefficients used from <code>bdotsFit</code></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Subject, Group, and LookType
-<span class="kw">head</span>(refit)
-<span class="co">#&gt;    Subject Group LookType        fit        R2  AR1 fitCode</span>
-<span class="co">#&gt; 1:       1    50   Cohort &lt;gnls[18]&gt; 0.9697202 TRUE       0</span>
-<span class="co">#&gt; 2:       1    65   Cohort &lt;gnls[18]&gt; 0.9804901 TRUE       0</span>
-<span class="co">#&gt; 3:       2    50   Cohort &lt;gnls[18]&gt; 0.9811708 TRUE       0</span>
-<span class="co">#&gt; 4:       2    65   Cohort &lt;gnls[18]&gt; 0.9697466 TRUE       0</span>
-<span class="co">#&gt; 5:       3    50   Cohort &lt;gnls[18]&gt; 0.9761906 TRUE       0</span>
-<span class="co">#&gt; 6:       3    65   Cohort &lt;gnls[18]&gt; 0.9448814 TRUE       1</span>
-
-## doubleGauss pars
-<span class="kw">colnames</span>(<span class="kw">coef</span>(refit))
-<span class="co">#&gt; [1] &quot;mu&quot;    &quot;ht&quot;    &quot;sig1&quot;  &quot;sig2&quot;  &quot;base1&quot; &quot;base2&quot;</span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a>parDT &lt;-<span class="st"> </span><span class="kw">coefWriteout</span>(refit)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a><span class="kw">head</span>(parDT)</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a><span class="co">#&gt;    Subject  Group LookType       mu        ht     sig1     sig2       base1</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true"></a><span class="co">#&gt;     &lt;char&gt; &lt;char&gt;   &lt;char&gt;    &lt;num&gt;     &lt;num&gt;    &lt;num&gt;    &lt;num&gt;       &lt;num&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true"></a><span class="co">#&gt; 1:       1     50   Cohort 417.6899 0.1986711 145.5628 323.1882  0.01586359</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true"></a><span class="co">#&gt; 2:       1     65   Cohort 636.8447 0.2632815 306.2330 214.9787 -0.02154793</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true"></a><span class="co">#&gt; 3:       2     50   Cohort 647.5295 0.2547779 496.6745 256.4257 -0.18223561</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true"></a><span class="co">#&gt; 4:       2     65   Cohort 734.1526 0.2585742 405.6348 240.2926 -0.05751246</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true"></a><span class="co">#&gt; 5:       3     50   Cohort 501.1949 0.2258572 398.7760 158.6752 -0.16159477</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true"></a><span class="co">#&gt; 6:       3     65   Cohort 460.7152 0.3067659 382.7322 166.0833 -0.24330874</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true"></a><span class="co">#&gt;         base2</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true"></a><span class="co">#&gt;         &lt;num&gt;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true"></a><span class="co">#&gt; 1: 0.03412371</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true"></a><span class="co">#&gt; 2: 0.02858644</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true"></a><span class="co">#&gt; 3: 0.01217570</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true"></a><span class="co">#&gt; 4: 0.03455280</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true"></a><span class="co">#&gt; 5: 0.02529158</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true"></a><span class="co">#&gt; 6: 0.03992168</span></span></code></pre></div>
+<p>It’s important that columns are included that match the unique identifying columns in our <code>bdotsObj</code>, and that the parameters match the coefficients used from <code>bfit</code></p>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="co">## Subject, Group, and LookType</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a><span class="kw">head</span>(refit)</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a><span class="co">#&gt;    Subject  Group LookType        fit        R2    AR1 fitCode</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a><span class="co">#&gt;     &lt;char&gt; &lt;char&gt;   &lt;char&gt;     &lt;list&gt;     &lt;num&gt; &lt;lgcl&gt;   &lt;int&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a><span class="co">#&gt; 1:       1     50   Cohort &lt;gnls[19]&gt; 0.9701367  FALSE       0</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a><span class="co">#&gt; 2:       1     65   Cohort &lt;gnls[19]&gt; 0.9805103  FALSE       0</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true"></a><span class="co">#&gt; 3:       2     50   Cohort &lt;gnls[19]&gt; 0.9813076  FALSE       0</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true"></a><span class="co">#&gt; 4:       2     65   Cohort &lt;gnls[19]&gt; 0.9701257  FALSE       0</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true"></a><span class="co">#&gt; 5:       3     50   Cohort &lt;gnls[19]&gt; 0.9765418  FALSE       0</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true"></a><span class="co">#&gt; 6:       3     65   Cohort &lt;gnls[19]&gt; 0.9534922  FALSE       0</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true"></a></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true"></a><span class="co">## doubleGauss pars</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true"></a><span class="kw">colnames</span>(<span class="kw">coef</span>(refit))</span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true"></a><span class="co">#&gt; [1] &quot;mu&quot;    &quot;ht&quot;    &quot;sig1&quot;  &quot;sig2&quot;  &quot;base1&quot; &quot;base2&quot;</span></span></code></pre></div>
 <p>We can save our parameter <code>data.table</code> for later use, or read in any other appropriately formatted <code>data.frame</code></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Save this for later using data.table::fwrite
-<span class="kw">fwrite</span>(parDT, <span class="dt">file =</span> <span class="st">&quot;mypars.csv&quot;</span>)
-parDT &lt;-<span class="st"> </span><span class="kw">fread</span>(<span class="st">&quot;mypars.csv&quot;</span>)</code></pre></div>
-<p>Once we have this, we can pass it as an argument to the <code>bdotsRefit</code> function. Doing so will ignore the remaining arguments</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">new_refit &lt;-<span class="st"> </span><span class="kw">bdotsRefit</span>(refit, <span class="dt">paramDT =</span> parDT)</code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="co">## Save this for later using data.table::fwrite</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a><span class="kw">fwrite</span>(parDT, <span class="dt">file =</span> <span class="st">&quot;mypars.csv&quot;</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true"></a>parDT &lt;-<span class="st"> </span><span class="kw">fread</span>(<span class="st">&quot;mypars.csv&quot;</span>)</span></code></pre></div>
+<p>Once we have this, we can pass it as an argument to the <code>brefit</code> function. Doing so will ignore the remaining arguments</p>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a>new_refit &lt;-<span class="st"> </span><span class="kw">brefit</span>(refit, <span class="dt">paramDT =</span> parDT)</span></code></pre></div>
 <p>We end up with a <code>bdotsObj</code> that matches what we had previously. As seeds have not yet been implemented, the resulting parameters may not be exact. It will, however, assist with not having to go through the entire refitting process again manually (although, there is always the option to save the entire object with <code>save(refit, file = &quot;refit.RData))</code></p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">head</span>(new_refit)
-<span class="co">#&gt;    Subject Group         LookType        fit        R2  AR1 fitCode</span>
-<span class="co">#&gt; 1:       1    50           Cohort &lt;gnls[18]&gt; 0.9697202 TRUE       0</span>
-<span class="co">#&gt; 2:       1    50 Unrelated_Cohort &lt;gnls[18]&gt; 0.9789994 TRUE       0</span>
-<span class="co">#&gt; 3:       1    65           Cohort &lt;gnls[18]&gt; 0.9804901 TRUE       0</span>
-<span class="co">#&gt; 4:       1    65 Unrelated_Cohort &lt;gnls[18]&gt; 0.8716404 TRUE       1</span>
-<span class="co">#&gt; 5:       2    50           Cohort &lt;gnls[18]&gt; 0.9811708 TRUE       0</span>
-<span class="co">#&gt; 6:       2    50 Unrelated_Cohort &lt;gnls[18]&gt; 0.9561166 TRUE       0</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="kw">head</span>(new_refit)</span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a><span class="co">#&gt; Key: &lt;Subject, Group, LookType&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a><span class="co">#&gt;    Subject  Group         LookType        fit        R2    AR1 fitCode</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a><span class="co">#&gt;     &lt;char&gt; &lt;char&gt;           &lt;char&gt;     &lt;list&gt;     &lt;num&gt; &lt;lgcl&gt;   &lt;int&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true"></a><span class="co">#&gt; 1:       1     50           Cohort &lt;gnls[19]&gt; 0.9701367  FALSE       0</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true"></a><span class="co">#&gt; 2:       1     50 Unrelated_Cohort &lt;gnls[19]&gt; 0.9793524  FALSE       0</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true"></a><span class="co">#&gt; 3:       1     65           Cohort &lt;gnls[19]&gt; 0.9805103  FALSE       0</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true"></a><span class="co">#&gt; 4:       1     65 Unrelated_Cohort &lt;gnls[19]&gt; 0.8742477  FALSE       1</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true"></a><span class="co">#&gt; 5:       2     50           Cohort &lt;gnls[19]&gt; 0.9813076  FALSE       0</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true"></a><span class="co">#&gt; 6:       2     50 Unrelated_Cohort &lt;gnls[19]&gt; 0.9561882  FALSE       0</span></span></code></pre></div>
 </div>
 
 

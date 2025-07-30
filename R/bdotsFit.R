@@ -8,9 +8,9 @@
 #' @param y Column name containing outcome of interest
 #' @param group Character vector containing column names of groups. Can be
 #' greater than one
-#' @param curveType See details/vignette
+#' @param curveFun Curve function for fitting observed data. See details/vignette
 #' @param cores number of cores. Default is \code{0}, indicating half cores available
-#' @param cor Boolean. Autocorrelation?
+#' @param ar Value indicates estimate for autocorrelation. A value of zero indicates to fit without AR(1) assumption
 #' @param numRefits Integer indicating number of attempts to fit an observation
 #' if the first attempt fails
 #' @param verbose currently not used
@@ -25,36 +25,34 @@
 #'
 #' @examples
 #' \dontrun{
-#' res <- bdotsFit(data = cohort_unrelated,
-#'                 subject = "Subject",
-#'                 time = "Time",
-#'                 y = "Fixations",
-#'                 group = c("Group", "LookType"),
-#'                 curveType = doubleGauss(concave = TRUE),
-#'                 cor = TRUE,
-#'                 numRefits = 2,
-#'                 cores = 0,
-#'                 verbose = FALSE)
+#' res <- bfit(data = cohort_unrelated,
+#'             subject = "Subject",
+#'             time = "Time",
+#'             y = "Fixations",
+#'             group = c("Group", "LookType"),
+#'             curveFun = doubleGauss(concave = TRUE),
+#'             numRefits = 2,
+#'             cores = 0)
 #' }
 #'
 #' @import data.table
 #' @import parallel
 #' @importFrom utils object.size
 #' @export
-bdotsFit <- function(data, # dataset
-                     subject, # subjects
-                     time, # column for time
-                     y, # response vector
-                     group, # groups for subjects
-                     curveType = doubleGauss(concave = TRUE),
-                     cor = TRUE, # autocorrelation?
-                     numRefits = 0,
-                     cores = 0, # cores to use, 0 == 50% of available
-                     verbose = FALSE,
-                     ...) {
+bfit <- function(data, # dataset
+                 subject, # subjects
+                 time, # column for time
+                 y, # response vector
+                 group, # groups for subjects
+                 curveFun,
+                 ar = FALSE, # autocorrelation?
+                 numRefits = 0,
+                 cores = 0, # cores to use, 0 == 50% of available
+                 verbose = FALSE,
+                 ...) {
 
   if (cores < 1) cores <- detectCores()/2
-  curveType <- substitute(curveType)
+  curveType <- substitute(curveFun) # didn't change curveType to curveFun anywhere else
   curveName <- curveType[[1]]
   curveType <- curve2Fun(curveType)
 
@@ -66,26 +64,33 @@ bdotsFit <- function(data, # dataset
     stop(stopMsg)
   }
 
-  # for removing rho (need to adjust in case it's in (...))
-  # Should verify that we don't have rho set and cor = FALSE
-  if (!exists("rho")) {
-    rho <- ifelse(cor, 0.9, 0)
-  } else {
-    if (cor & (rho >= 1 | rho < 0)) {
-      warning("cor set to TRUE with invalid rho. Setting rho to 0.9")
-      rho <- 0.9
-    }
-  }
+  ## Cor no longer arg so this should be cleaned up, as in
+  # there is no way for them to deliver a rho argument
+  # if (!exists("rho")) {
+  #   rho <- ifelse(ar, 0.9, 0)
+  # } else {
+  #   if (ar & (rho >= 1 | rho < 0)) {
+  #     warning("cor set to TRUE with invalid rho. Setting rho to 0.9")
+  #     rho <- 0.9
+  #   }
+  # }
+
+  rho <- ifelse(ar, 0.9, 0)
 
   ## Factors are bad, m'kay?
   dat <- setDT(data)
   dat[, (group) := lapply(.SD, as.character), .SDcols = group]
   dat[, (subject) := lapply(.SD, as.character), .SDcols = subject]
 
-  ## Let's only keep the columns we need (have not tested this yet)
-  ## Ok, let's try keeping everything in case we need correlation with fixed val
-  #dat <- dat[, c(y, time, subject, group), with = FALSE]
-
+  ## Look for "." here to avoid issues later
+  hasperiod <- vapply(subset(dat, select = group), function(x) {
+    sum(grepl("\\.", x))}, numeric(1)) #|> sum()
+  hasperiod <- suppressWarnings(as.logical(hasperiod))
+  if (any(hasperiod)) {
+    badgrp <- group[hasperiod]
+    if (length(badgrp) > 1) badgrp <- paste(badgrp, collapse = ", ")
+    stop(paste("Cannot have '.' in group values. Consider replacing with '_'\n Replace values in columns:", badgrp))
+  }
 
   timetest <- split(dat, by = group, drop = TRUE)
   timetest <- lapply(timetest, function(x) unique(x[[time]]))
@@ -96,19 +101,7 @@ bdotsFit <- function(data, # dataset
 
   timeSame <- identical(Reduce(intersect, timetest, init = timetest[[1]]),
                         Reduce(union, timetest, init = timetest[[1]]))
-  #if (!timeSame) stop("Observed times are different between groups")
-  # if (!timeSame) {
-  #   warning("Observed times are not identical between groups. This will result in weird plotting behavior")
-  # }
 
-  ## This should work inside function. Let's check
-  # if this happens, need to modify X for plots to work
-  # if (any(dat[, .N, by = c(subject, time, group)]$N > 1)) {
-  #   warning("Some subjects have multiple observations for unique time. These will be averaged")
-  #   yval <- deparse(substitute(y))
-  #   dat[, substitute(y) := mean(get(y)), by = c(subject, time, group)]
-  #   dat <- unique(dat, by = c(subject, time, group))
-  # }
 
   splitVars <- c(subject, group)
   newdat <- split(dat, by = splitVars, drop = TRUE)
@@ -120,15 +113,6 @@ bdotsFit <- function(data, # dataset
   }
 
   invisible(clusterEvalQ(cl, {library(bdots)}))
-
-  ## Only for error checking, as devtools::load_all doesn't help
-  ## with parallel
-  # res <- vector("list", length(newdat))
-  # for (i in seq_along(newdat)) {
-  #   res[[i]] <- bdotsFitter(newdat[[i]], curveType, rho,
-  #                           numRefits, verbose = FALSE,
-  #                           splitVars = splitVars, datVarNames = datVarNames)
-  # }
 
   res <- parLapply(cl, newdat, bdotsFitter,
                    curveType = curveType,
@@ -154,17 +138,6 @@ bdotsFit <- function(data, # dataset
   ff <- attr(res[[1]], "formula")
   fitList <- data.table::rbindlist(res, fill = TRUE)
 
-  ## If too large, should get "name" of data
-  ## and option to call it from global env
-  # if (is.null(returnX)) {
-  #   sz <- object.size(dat)
-  #   if (sz < 1e8L) X <- dat
-  # } else if (returnX) {
-  #   X <- dat
-  # } else {
-  #   X <- dat # for now
-  # }
-
   X_env <- new.env(parent = emptyenv())
   X_env$X <- dat
 
@@ -174,6 +147,11 @@ bdotsFit <- function(data, # dataset
   groups <- list(groups = group,
                  vals = vals)
 
+  ## This breaks dependency somewhere
+  # if (!ar) {
+  #   fitList$AR1 <- NULL
+  # }
+
   res <- structure(class = c("bdotsObj", "data.table", "data.frame"),
                    .Data = fitList,
                    formula = ff,
@@ -181,6 +159,7 @@ bdotsFit <- function(data, # dataset
                    call = match.call(),
                    time = time_vec, # Now the union of all the times
                    rho = rho,
+                   ar = ar,
                    groups = groups,
                    X = X_env)
 }

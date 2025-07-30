@@ -14,6 +14,35 @@
 
 <title>User Curve Functions</title>
 
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+<script>// Hide empty <a> tag within highlighted CodeBlock for screen reader accessibility (see https://github.com/jgm/pandoc/issues/6352#issuecomment-626106786) -->
+// v0.0.1
+// Written by JooYoung Seo (jooyoung@psu.edu) and Atsushi Yasumoto on June 1st, 2020.
+
+document.addEventListener('DOMContentLoaded', function() {
+  const codeList = document.getElementsByClassName("sourceCode");
+  for (var i = 0; i < codeList.length; i++) {
+    var linkList = codeList[i].getElementsByTagName('a');
+    for (var j = 0; j < linkList.length; j++) {
+      if (linkList[j].innerHTML === "") {
+        linkList[j].setAttribute('aria-hidden', 'true');
+      }
+    }
+  }
+});
+</script>
 
 <style type="text/css">
   code{white-space: pre-wrap;}
@@ -35,41 +64,68 @@
   }
 </style>
 <style type="text/css" data-origin="pandoc">
-div.sourceCode { overflow-x: auto; }
-table.sourceCode, tr.sourceCode, td.lineNumbers, td.sourceCode {
-  margin: 0; padding: 0; vertical-align: baseline; border: none; }
-table.sourceCode { width: 100%; line-height: 100%; }
-td.lineNumbers { text-align: right; padding-right: 4px; padding-left: 4px; color: #aaaaaa; border-right: 1px solid #aaaaaa; }
-td.sourceCode { padding-left: 5px; }
-code > span.kw { color: #007020; font-weight: bold; } /* Keyword */
-code > span.dt { color: #902000; } /* DataType */
-code > span.dv { color: #40a070; } /* DecVal */
-code > span.bn { color: #40a070; } /* BaseN */
-code > span.fl { color: #40a070; } /* Float */
-code > span.ch { color: #4070a0; } /* Char */
-code > span.st { color: #4070a0; } /* String */
-code > span.co { color: #60a0b0; font-style: italic; } /* Comment */
-code > span.ot { color: #007020; } /* Other */
-code > span.al { color: #ff0000; font-weight: bold; } /* Alert */
-code > span.fu { color: #06287e; } /* Function */
-code > span.er { color: #ff0000; font-weight: bold; } /* Error */
-code > span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-code > span.cn { color: #880000; } /* Constant */
-code > span.sc { color: #4070a0; } /* SpecialChar */
-code > span.vs { color: #4070a0; } /* VerbatimString */
-code > span.ss { color: #bb6688; } /* SpecialString */
-code > span.im { } /* Import */
-code > span.va { color: #19177c; } /* Variable */
-code > span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
-code > span.op { color: #666666; } /* Operator */
-code > span.bu { } /* BuiltIn */
-code > span.ex { } /* Extension */
-code > span.pp { color: #bc7a00; } /* Preprocessor */
-code > span.at { color: #7d9029; } /* Attribute */
-code > span.do { color: #ba2121; font-style: italic; } /* Documentation */
-code > span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
-code > span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
-code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+pre > code.sourceCode { white-space: pre; position: relative; }
+pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+pre > code.sourceCode > span:empty { height: 1.2em; }
+code.sourceCode > span { color: inherit; text-decoration: inherit; }
+div.sourceCode { margin: 1em 0; }
+pre.sourceCode { margin: 0; }
+@media screen {
+div.sourceCode { overflow: auto; }
+}
+@media print {
+pre > code.sourceCode { white-space: pre-wrap; }
+pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+}
+pre.numberSource code
+  { counter-reset: source-line 0; }
+pre.numberSource code > span
+  { position: relative; left: -4em; counter-increment: source-line; }
+pre.numberSource code > span > a:first-child::before
+  { content: counter(source-line);
+    position: relative; left: -1em; text-align: right; vertical-align: baseline;
+    border: none; display: inline-block;
+    -webkit-touch-callout: none; -webkit-user-select: none;
+    -khtml-user-select: none; -moz-user-select: none;
+    -ms-user-select: none; user-select: none;
+    padding: 0 4px; width: 4em;
+    color: #aaaaaa;
+  }
+pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+div.sourceCode
+  {   }
+@media screen {
+pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+}
+code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+code span.at { color: #7d9029; } /* Attribute */
+code span.bn { color: #40a070; } /* BaseN */
+code span.bu { } /* BuiltIn */
+code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+code span.ch { color: #4070a0; } /* Char */
+code span.cn { color: #880000; } /* Constant */
+code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+code span.dt { color: #902000; } /* DataType */
+code span.dv { color: #40a070; } /* DecVal */
+code span.er { color: #ff0000; font-weight: bold; } /* Error */
+code span.ex { } /* Extension */
+code span.fl { color: #40a070; } /* Float */
+code span.fu { color: #06287e; } /* Function */
+code span.im { } /* Import */
+code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+code span.op { color: #666666; } /* Operator */
+code span.ot { color: #007020; } /* Other */
+code span.pp { color: #bc7a00; } /* Preprocessor */
+code span.sc { color: #4070a0; } /* SpecialChar */
+code span.ss { color: #bb6688; } /* SpecialString */
+code span.st { color: #4070a0; } /* String */
+code span.va { color: #19177c; } /* Variable */
+code span.vs { color: #4070a0; } /* VerbatimString */
+code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
 
 </style>
 <script>
@@ -104,7 +160,187 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<link href="data:text/css;charset=utf-8,body%20%7B%0Abackground%2Dcolor%3A%20%23fff%3B%0Amargin%3A%201em%20auto%3B%0Amax%2Dwidth%3A%20700px%3B%0Aoverflow%3A%20visible%3B%0Apadding%2Dleft%3A%202em%3B%0Apadding%2Dright%3A%202em%3B%0Afont%2Dfamily%3A%20%22Open%20Sans%22%2C%20%22Helvetica%20Neue%22%2C%20Helvetica%2C%20Arial%2C%20sans%2Dserif%3B%0Afont%2Dsize%3A%2014px%3B%0Aline%2Dheight%3A%201%2E35%3B%0A%7D%0A%23TOC%20%7B%0Aclear%3A%20both%3B%0Amargin%3A%200%200%2010px%2010px%3B%0Apadding%3A%204px%3B%0Awidth%3A%20400px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Aborder%2Dradius%3A%205px%3B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Afont%2Dsize%3A%2013px%3B%0Aline%2Dheight%3A%201%2E3%3B%0A%7D%0A%23TOC%20%2Etoctitle%20%7B%0Afont%2Dweight%3A%20bold%3B%0Afont%2Dsize%3A%2015px%3B%0Amargin%2Dleft%3A%205px%3B%0A%7D%0A%23TOC%20ul%20%7B%0Apadding%2Dleft%3A%2040px%3B%0Amargin%2Dleft%3A%20%2D1%2E5em%3B%0Amargin%2Dtop%3A%205px%3B%0Amargin%2Dbottom%3A%205px%3B%0A%7D%0A%23TOC%20ul%20ul%20%7B%0Amargin%2Dleft%3A%20%2D2em%3B%0A%7D%0A%23TOC%20li%20%7B%0Aline%2Dheight%3A%2016px%3B%0A%7D%0Atable%20%7B%0Amargin%3A%201em%20auto%3B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dcolor%3A%20%23DDDDDD%3B%0Aborder%2Dstyle%3A%20outset%3B%0Aborder%2Dcollapse%3A%20collapse%3B%0A%7D%0Atable%20th%20%7B%0Aborder%2Dwidth%3A%202px%3B%0Apadding%3A%205px%3B%0Aborder%2Dstyle%3A%20inset%3B%0A%7D%0Atable%20td%20%7B%0Aborder%2Dwidth%3A%201px%3B%0Aborder%2Dstyle%3A%20inset%3B%0Aline%2Dheight%3A%2018px%3B%0Apadding%3A%205px%205px%3B%0A%7D%0Atable%2C%20table%20th%2C%20table%20td%20%7B%0Aborder%2Dleft%2Dstyle%3A%20none%3B%0Aborder%2Dright%2Dstyle%3A%20none%3B%0A%7D%0Atable%20thead%2C%20table%20tr%2Eeven%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Ap%20%7B%0Amargin%3A%200%2E5em%200%3B%0A%7D%0Ablockquote%20%7B%0Abackground%2Dcolor%3A%20%23f6f6f6%3B%0Apadding%3A%200%2E25em%200%2E75em%3B%0A%7D%0Ahr%20%7B%0Aborder%2Dstyle%3A%20solid%3B%0Aborder%3A%20none%3B%0Aborder%2Dtop%3A%201px%20solid%20%23777%3B%0Amargin%3A%2028px%200%3B%0A%7D%0Adl%20%7B%0Amargin%2Dleft%3A%200%3B%0A%7D%0Adl%20dd%20%7B%0Amargin%2Dbottom%3A%2013px%3B%0Amargin%2Dleft%3A%2013px%3B%0A%7D%0Adl%20dt%20%7B%0Afont%2Dweight%3A%20bold%3B%0A%7D%0Aul%20%7B%0Amargin%2Dtop%3A%200%3B%0A%7D%0Aul%20li%20%7B%0Alist%2Dstyle%3A%20circle%20outside%3B%0A%7D%0Aul%20ul%20%7B%0Amargin%2Dbottom%3A%200%3B%0A%7D%0Apre%2C%20code%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0Aborder%2Dradius%3A%203px%3B%0Acolor%3A%20%23333%3B%0Awhite%2Dspace%3A%20pre%2Dwrap%3B%20%0A%7D%0Apre%20%7B%0Aborder%2Dradius%3A%203px%3B%0Amargin%3A%205px%200px%2010px%200px%3B%0Apadding%3A%2010px%3B%0A%7D%0Apre%3Anot%28%5Bclass%5D%29%20%7B%0Abackground%2Dcolor%3A%20%23f7f7f7%3B%0A%7D%0Acode%20%7B%0Afont%2Dfamily%3A%20Consolas%2C%20Monaco%2C%20%27Courier%20New%27%2C%20monospace%3B%0Afont%2Dsize%3A%2085%25%3B%0A%7D%0Ap%20%3E%20code%2C%20li%20%3E%20code%20%7B%0Apadding%3A%202px%200px%3B%0A%7D%0Adiv%2Efigure%20%7B%0Atext%2Dalign%3A%20center%3B%0A%7D%0Aimg%20%7B%0Abackground%2Dcolor%3A%20%23FFFFFF%3B%0Apadding%3A%202px%3B%0Aborder%3A%201px%20solid%20%23DDDDDD%3B%0Aborder%2Dradius%3A%203px%3B%0Aborder%3A%201px%20solid%20%23CCCCCC%3B%0Amargin%3A%200%205px%3B%0A%7D%0Ah1%20%7B%0Amargin%2Dtop%3A%200%3B%0Afont%2Dsize%3A%2035px%3B%0Aline%2Dheight%3A%2040px%3B%0A%7D%0Ah2%20%7B%0Aborder%2Dbottom%3A%204px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Apadding%2Dbottom%3A%202px%3B%0Afont%2Dsize%3A%20145%25%3B%0A%7D%0Ah3%20%7B%0Aborder%2Dbottom%3A%202px%20solid%20%23f7f7f7%3B%0Apadding%2Dtop%3A%2010px%3B%0Afont%2Dsize%3A%20120%25%3B%0A%7D%0Ah4%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23f7f7f7%3B%0Amargin%2Dleft%3A%208px%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Ah5%2C%20h6%20%7B%0Aborder%2Dbottom%3A%201px%20solid%20%23ccc%3B%0Afont%2Dsize%3A%20105%25%3B%0A%7D%0Aa%20%7B%0Acolor%3A%20%230033dd%3B%0Atext%2Ddecoration%3A%20none%3B%0A%7D%0Aa%3Ahover%20%7B%0Acolor%3A%20%236666ff%3B%20%7D%0Aa%3Avisited%20%7B%0Acolor%3A%20%23800080%3B%20%7D%0Aa%3Avisited%3Ahover%20%7B%0Acolor%3A%20%23BB00BB%3B%20%7D%0Aa%5Bhref%5E%3D%22http%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0Aa%5Bhref%5E%3D%22https%3A%22%5D%20%7B%0Atext%2Ddecoration%3A%20underline%3B%20%7D%0A%0Acode%20%3E%20span%2Ekw%20%7B%20color%3A%20%23555%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Edt%20%7B%20color%3A%20%23902000%3B%20%7D%20%0Acode%20%3E%20span%2Edv%20%7B%20color%3A%20%2340a070%3B%20%7D%20%0Acode%20%3E%20span%2Ebn%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Efl%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Ech%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Est%20%7B%20color%3A%20%23d14%3B%20%7D%20%0Acode%20%3E%20span%2Eco%20%7B%20color%3A%20%23888888%3B%20font%2Dstyle%3A%20italic%3B%20%7D%20%0Acode%20%3E%20span%2Eot%20%7B%20color%3A%20%23007020%3B%20%7D%20%0Acode%20%3E%20span%2Eal%20%7B%20color%3A%20%23ff0000%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Efu%20%7B%20color%3A%20%23900%3B%20font%2Dweight%3A%20bold%3B%20%7D%20%0Acode%20%3E%20span%2Eer%20%7B%20color%3A%20%23a61717%3B%20background%2Dcolor%3A%20%23e3d2d2%3B%20%7D%20%0A" rel="stylesheet" type="text/css" />
+<style type="text/css">body {
+background-color: #fff;
+margin: 1em auto;
+max-width: 700px;
+overflow: visible;
+padding-left: 2em;
+padding-right: 2em;
+font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
+font-size: 14px;
+line-height: 1.35;
+}
+#TOC {
+clear: both;
+margin: 0 0 10px 10px;
+padding: 4px;
+width: 400px;
+border: 1px solid #CCCCCC;
+border-radius: 5px;
+background-color: #f6f6f6;
+font-size: 13px;
+line-height: 1.3;
+}
+#TOC .toctitle {
+font-weight: bold;
+font-size: 15px;
+margin-left: 5px;
+}
+#TOC ul {
+padding-left: 40px;
+margin-left: -1.5em;
+margin-top: 5px;
+margin-bottom: 5px;
+}
+#TOC ul ul {
+margin-left: -2em;
+}
+#TOC li {
+line-height: 16px;
+}
+table {
+margin: 1em auto;
+border-width: 1px;
+border-color: #DDDDDD;
+border-style: outset;
+border-collapse: collapse;
+}
+table th {
+border-width: 2px;
+padding: 5px;
+border-style: inset;
+}
+table td {
+border-width: 1px;
+border-style: inset;
+line-height: 18px;
+padding: 5px 5px;
+}
+table, table th, table td {
+border-left-style: none;
+border-right-style: none;
+}
+table thead, table tr.even {
+background-color: #f7f7f7;
+}
+p {
+margin: 0.5em 0;
+}
+blockquote {
+background-color: #f6f6f6;
+padding: 0.25em 0.75em;
+}
+hr {
+border-style: solid;
+border: none;
+border-top: 1px solid #777;
+margin: 28px 0;
+}
+dl {
+margin-left: 0;
+}
+dl dd {
+margin-bottom: 13px;
+margin-left: 13px;
+}
+dl dt {
+font-weight: bold;
+}
+ul {
+margin-top: 0;
+}
+ul li {
+list-style: circle outside;
+}
+ul ul {
+margin-bottom: 0;
+}
+pre, code {
+background-color: #f7f7f7;
+border-radius: 3px;
+color: #333;
+white-space: pre-wrap; 
+}
+pre {
+border-radius: 3px;
+margin: 5px 0px 10px 0px;
+padding: 10px;
+}
+pre:not([class]) {
+background-color: #f7f7f7;
+}
+code {
+font-family: Consolas, Monaco, 'Courier New', monospace;
+font-size: 85%;
+}
+p > code, li > code {
+padding: 2px 0px;
+}
+div.figure {
+text-align: center;
+}
+img {
+background-color: #FFFFFF;
+padding: 2px;
+border: 1px solid #DDDDDD;
+border-radius: 3px;
+border: 1px solid #CCCCCC;
+margin: 0 5px;
+}
+h1 {
+margin-top: 0;
+font-size: 35px;
+line-height: 40px;
+}
+h2 {
+border-bottom: 4px solid #f7f7f7;
+padding-top: 10px;
+padding-bottom: 2px;
+font-size: 145%;
+}
+h3 {
+border-bottom: 2px solid #f7f7f7;
+padding-top: 10px;
+font-size: 120%;
+}
+h4 {
+border-bottom: 1px solid #f7f7f7;
+margin-left: 8px;
+font-size: 105%;
+}
+h5, h6 {
+border-bottom: 1px solid #ccc;
+font-size: 105%;
+}
+a {
+color: #0033dd;
+text-decoration: none;
+}
+a:hover {
+color: #6666ff; }
+a:visited {
+color: #800080; }
+a:visited:hover {
+color: #BB00BB; }
+a[href^="http:"] {
+text-decoration: underline; }
+a[href^="https:"] {
+text-decoration: underline; }
+
+code > span.kw { color: #555; font-weight: bold; } 
+code > span.dt { color: #902000; } 
+code > span.dv { color: #40a070; } 
+code > span.bn { color: #d14; } 
+code > span.fl { color: #d14; } 
+code > span.ch { color: #d14; } 
+code > span.st { color: #d14; } 
+code > span.co { color: #888888; font-style: italic; } 
+code > span.ot { color: #007020; } 
+code > span.al { color: #ff0000; font-weight: bold; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
+</style>
 
 
 
@@ -120,57 +356,57 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 
 
 
-<p>We saw in the <a href="bdots.html">general overview</a> when first generating our model fits with <code>bdotsFit</code> that we we could specify the curve with the argument <code>curveType</code>. Presently, the <code>bdots</code> package contains three options for this: <code>doubleGauss</code>, <code>logistic</code>, and <code>polynomial</code>. Documentation is included for each of these curves.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">library</span>(bdots)
-
-fit &lt;-<span class="st"> </span><span class="kw">bdotsFit</span>(<span class="dt">data =</span> cohort_unrelated,
-                <span class="dt">subject =</span> <span class="st">&quot;Subject&quot;</span>,
-                <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>,
-                <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>,
-                <span class="dt">group =</span> <span class="kw">c</span>(<span class="st">&quot;DB_cond&quot;</span>, <span class="st">&quot;LookType&quot;</span>),
-                <span class="dt">curveType =</span> <span class="kw">doubleGauss</span>(<span class="dt">concave =</span> <span class="ot">TRUE</span>),
-                <span class="dt">cores =</span> <span class="dv">2</span>)</code></pre></div>
+<p>We saw in the <a href="bdots.html">general overview</a> when first generating our model fits with <code>bfit</code> that we we could specify the curve with the argument <code>curveType</code>. Presently, the <code>bdots</code> package contains three options for this: <code>doubleGauss</code>, <code>logistic</code>, and <code>polynomial</code>. Documentation is included for each of these curves.</p>
+<div class="sourceCode" id="cb1"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true"></a><span class="kw">library</span>(bdots)</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true"></a>fit &lt;-<span class="st"> </span><span class="kw">bfit</span>(<span class="dt">data =</span> cohort_unrelated,</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true"></a>            <span class="dt">subject =</span> <span class="st">&quot;Subject&quot;</span>,</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true"></a>            <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>,</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true"></a>            <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>,</span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true"></a>            <span class="dt">group =</span> <span class="kw">c</span>(<span class="st">&quot;DB_cond&quot;</span>, <span class="st">&quot;LookType&quot;</span>),</span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true"></a>            <span class="dt">curveFun =</span> <span class="kw">doubleGauss</span>(<span class="dt">concave =</span> <span class="ot">TRUE</span>),</span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true"></a>            <span class="dt">cores =</span> <span class="dv">2</span>)</span></code></pre></div>
 <p>Note that each of these is a function in their own right and must be passed in as a <code>call</code> object. Curve functions that include arguments further specifying the type of curve, i.e., <code>doubleGauss(concave = TRUE)</code> and <code>polynomial(degree = n)</code>, should include these when the call is passed into <code>bdotsFit</code> as seen in the example above.</p>
-<p>Because each of the functions exists independently of <code>bdotsFit</code>, users can specify their own curve functions for the fitting and bootstrapping process. The purpose of this vignette is to demonstrate how to do so. If you find that you have a curve function that is especially useful, please create a request to have it added to the <code>bdots</code> package <a href="https://github.com/collinn/bdots/issues">here</a>.</p>
-<p>We will examine the <code>doubleGauss</code> function in more detail to see how we might go about creating our own. First, let's identify the components of this function</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doubleGauss
-<span class="co">#&gt; function (dat, y, time, params = NULL, concave = TRUE, ...) </span>
-<span class="co">#&gt; {</span>
-<span class="co">#&gt;     if (is.null(params)) {</span>
-<span class="co">#&gt;         params &lt;- dgaussPars(dat, y, time, concave)</span>
-<span class="co">#&gt;     }</span>
-<span class="co">#&gt;     else {</span>
-<span class="co">#&gt;         if (length(params) != 6) </span>
-<span class="co">#&gt;             stop(&quot;doubleGauss requires 6 parameters be specified for refitting&quot;)</span>
-<span class="co">#&gt;         if (!all(names(params) %in% c(&quot;mu&quot;, &quot;ht&quot;, &quot;sig1&quot;, &quot;sig2&quot;, </span>
-<span class="co">#&gt;             &quot;base1&quot;, &quot;base2&quot;))) {</span>
-<span class="co">#&gt;             stop(&quot;doubleGauss parameters for refitting must be correctly labeled&quot;)</span>
-<span class="co">#&gt;         }</span>
-<span class="co">#&gt;     }</span>
-<span class="co">#&gt;     if (is.null(params)) {</span>
-<span class="co">#&gt;         return(NULL)</span>
-<span class="co">#&gt;     }</span>
-<span class="co">#&gt;     y &lt;- str2lang(y)</span>
-<span class="co">#&gt;     time &lt;- str2lang(time)</span>
-<span class="co">#&gt;     ff &lt;- bquote(.(y) ~ (.(time) &lt; mu) * (exp(-1 * (.(time) - </span>
-<span class="co">#&gt;         mu)^2/(2 * sig1^2)) * (ht - base1) + base1) + (mu &lt;= </span>
-<span class="co">#&gt;         .(time)) * (exp(-1 * (.(time) - mu)^2/(2 * sig2^2)) * </span>
-<span class="co">#&gt;         (ht - base2) + base2))</span>
-<span class="co">#&gt;     attr(ff, &quot;parnames&quot;) &lt;- names(params)</span>
-<span class="co">#&gt;     return(list(formula = ff, params = params))</span>
-<span class="co">#&gt; }</span>
-<span class="co">#&gt; &lt;bytecode: 0x55b748e91a38&gt;</span>
-<span class="co">#&gt; &lt;environment: namespace:bdots&gt;</span></code></pre></div>
+<p>Because each of the functions exists independently of <code>bfit</code>, users can specify their own curve functions for the fitting and bootstrapping process. The purpose of this vignette is to demonstrate how to do so. If you find that you have a curve function that is especially useful, please create a request to have it added to the <code>bdots</code> package <a href="https://github.com/collinn/bdots/issues">here</a>.</p>
+<p>We will examine the <code>doubleGauss</code> function in more detail to see how we might go about creating our own. First, let’s identify the components of this function</p>
+<div class="sourceCode" id="cb2"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true"></a>doubleGauss</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true"></a><span class="co">#&gt; function (dat, y, time, params = NULL, concave = TRUE, ...) </span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true"></a><span class="co">#&gt; {</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true"></a><span class="co">#&gt;     if (is.null(params)) {</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true"></a><span class="co">#&gt;         params &lt;- dgaussPars(dat, y, time, concave)</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true"></a><span class="co">#&gt;     }</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true"></a><span class="co">#&gt;     else {</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true"></a><span class="co">#&gt;         if (length(params) != 6) </span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true"></a><span class="co">#&gt;             stop(&quot;doubleGauss requires 6 parameters be specified for refitting&quot;)</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true"></a><span class="co">#&gt;         if (!all(names(params) %in% c(&quot;mu&quot;, &quot;ht&quot;, &quot;sig1&quot;, &quot;sig2&quot;, </span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true"></a><span class="co">#&gt;             &quot;base1&quot;, &quot;base2&quot;))) {</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true"></a><span class="co">#&gt;             stop(&quot;doubleGauss parameters for refitting must be correctly labeled&quot;)</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true"></a><span class="co">#&gt;         }</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true"></a><span class="co">#&gt;     }</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true"></a><span class="co">#&gt;     if (is.null(params)) {</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true"></a><span class="co">#&gt;         return(NULL)</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true"></a><span class="co">#&gt;     }</span></span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true"></a><span class="co">#&gt;     y &lt;- str2lang(y)</span></span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true"></a><span class="co">#&gt;     time &lt;- str2lang(time)</span></span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true"></a><span class="co">#&gt;     ff &lt;- bquote(.(y) ~ (.(time) &lt; mu) * (exp(-1 * (.(time) - </span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true"></a><span class="co">#&gt;         mu)^2/(2 * sig1^2)) * (ht - base1) + base1) + (mu &lt;= </span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true"></a><span class="co">#&gt;         .(time)) * (exp(-1 * (.(time) - mu)^2/(2 * sig2^2)) * </span></span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true"></a><span class="co">#&gt;         (ht - base2) + base2))</span></span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true"></a><span class="co">#&gt;     attr(ff, &quot;parnames&quot;) &lt;- names(params)</span></span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true"></a><span class="co">#&gt;     return(list(formula = ff, params = params))</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true"></a><span class="co">#&gt; }</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true"></a><span class="co">#&gt; &lt;bytecode: 0x59477a1597a8&gt;</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true"></a><span class="co">#&gt; &lt;environment: namespace:bdots&gt;</span></span></code></pre></div>
 <p>There are four things to note:</p>
 <ol style="list-style-type: decimal">
 <li><dl>
 <dt>Arguments</dt>
-<dd>In addition to the argument <code>concave = TRUE</code>, which specifies the curve, we also have <code>dat</code>, <code>y</code>, <code>time</code>, <code>params = NULL</code>, and <code>...</code>. These are the names that must be used for the function to be called correctly. The first represents a <code>data.frame</code> or <code>data.table</code> subset from the <code>data</code> argument to <code>bdotsFit</code>, while <code>y</code> and <code>time</code> correspond to their respective arguments in <code>bdotsFit</code> and should assume that the arguments are passed in as <code>character</code>. It's important to remember to set <code>params = NULL</code>, as this is only used during the refitting step.
+<dd>In addition to the argument <code>concave = TRUE</code>, which specifies the curve, we also have <code>dat</code>, <code>y</code>, <code>time</code>, <code>params = NULL</code>, and <code>...</code>. These are the names that must be used for the function to be called correctly. The first represents a <code>data.frame</code> or <code>data.table</code> subset from the <code>data</code> argument to <code>bdotsFit</code>, while <code>y</code> and <code>time</code> correspond to their respective arguments in <code>bdotsFit</code> and should assume that the arguments are passed in as <code>character</code>. It’s important to remember to set <code>params = NULL</code>, as this is only used during the refitting step.
 </dd>
 </dl></li>
 <li><dl>
 <dt>Body</dt>
-<dd>As can be seen here, when <code>params = NULL</code>, the body of the function computes the necessary starting parameters to be used with the <code>gnls</code> fitting function. In this case, the function <code>dgaussPars</code> handles the initial parameter estimation and returns a named <code>numeric</code>. When <code>params</code> is not <code>NULL</code>, it's usually a good idea to verify that it is the correct length and has the correct parameter names.
+<dd>As can be seen here, when <code>params = NULL</code>, the body of the function computes the necessary starting parameters to be used with the <code>gnls</code> fitting function. In this case, the function <code>dgaussPars</code> handles the initial parameter estimation and returns a named <code>numeric</code>. When <code>params</code> is not <code>NULL</code>, it’s usually a good idea to verify that it is the correct length and has the correct parameter names.
 </dd>
 </dl></li>
 <li><dl>
@@ -185,83 +421,84 @@ fit &lt;-<span class="st"> </span><span class="kw">bdotsFit</span>(<span class="
 </dl></li>
 </ol>
 <p>Briefly, we can see how this function is used by subsetting the data to a single subject and calling it directly.</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Return a unique subject/group permutation
-dat &lt;-<span class="st"> </span>cohort_unrelated[Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>DB_cond <span class="op">==</span><span class="st"> </span><span class="dv">50</span> <span class="op">&amp;</span><span class="st"> </span>LookType <span class="op">==</span><span class="st"> &quot;Cohort&quot;</span>, ]
-dat
-<span class="co">#&gt;      Subject Time DB_cond  Fixations LookType Group</span>
-<span class="co">#&gt;   1:       1    0      50 0.01136364   Cohort    50</span>
-<span class="co">#&gt;   2:       1    4      50 0.01136364   Cohort    50</span>
-<span class="co">#&gt;   3:       1    8      50 0.01136364   Cohort    50</span>
-<span class="co">#&gt;   4:       1   12      50 0.01136364   Cohort    50</span>
-<span class="co">#&gt;   5:       1   16      50 0.02272727   Cohort    50</span>
-<span class="co">#&gt;  ---                                               </span>
-<span class="co">#&gt; 497:       1 1984      50 0.02272727   Cohort    50</span>
-<span class="co">#&gt; 498:       1 1988      50 0.02272727   Cohort    50</span>
-<span class="co">#&gt; 499:       1 1992      50 0.02272727   Cohort    50</span>
-<span class="co">#&gt; 500:       1 1996      50 0.02272727   Cohort    50</span>
-<span class="co">#&gt; 501:       1 2000      50 0.02272727   Cohort    50</span></code></pre></div>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## See return value
-<span class="kw">doubleGauss</span>(<span class="dt">dat =</span> dat, <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>, <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>, <span class="dt">concave =</span> <span class="ot">TRUE</span>)
-<span class="co">#&gt; $formula</span>
-<span class="co">#&gt; Fixations ~ (Time &lt; mu) * (exp(-1 * (Time - mu)^2/(2 * sig1^2)) * </span>
-<span class="co">#&gt;     (ht - base1) + base1) + (mu &lt;= Time) * (exp(-1 * (Time - </span>
-<span class="co">#&gt;     mu)^2/(2 * sig2^2)) * (ht - base2) + base2)</span>
-<span class="co">#&gt; attr(,&quot;parnames&quot;)</span>
-<span class="co">#&gt; [1] &quot;mu&quot;    &quot;ht&quot;    &quot;sig1&quot;  &quot;sig2&quot;  &quot;base1&quot; &quot;base2&quot;</span>
-<span class="co">#&gt; </span>
-<span class="co">#&gt; $params</span>
-<span class="co">#&gt;           mu           ht         sig1         sig2        base1        base2 </span>
-<span class="co">#&gt; 428.00000000   0.21590909 152.00000000 396.00000000   0.01136364   0.02272727</span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true"></a><span class="co">## Return a unique subject/group permutation</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true"></a>dat &lt;-<span class="st"> </span>cohort_unrelated[Subject <span class="op">==</span><span class="st"> </span><span class="dv">1</span> <span class="op">&amp;</span><span class="st"> </span>DB_cond <span class="op">==</span><span class="st"> </span><span class="dv">50</span> <span class="op">&amp;</span><span class="st"> </span>LookType <span class="op">==</span><span class="st"> &quot;Cohort&quot;</span>, ]</span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true"></a>dat</span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true"></a><span class="co">#&gt;      Subject  Time DB_cond  Fixations LookType Group</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true"></a><span class="co">#&gt;       &lt;char&gt; &lt;int&gt;  &lt;char&gt;      &lt;num&gt;   &lt;char&gt; &lt;int&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true"></a><span class="co">#&gt;   1:       1     0      50 0.01136364   Cohort    50</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true"></a><span class="co">#&gt;   2:       1     4      50 0.01136364   Cohort    50</span></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true"></a><span class="co">#&gt;   3:       1     8      50 0.01136364   Cohort    50</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true"></a><span class="co">#&gt;   4:       1    12      50 0.01136364   Cohort    50</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true"></a><span class="co">#&gt;   5:       1    16      50 0.02272727   Cohort    50</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true"></a><span class="co">#&gt;  ---                                                </span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true"></a><span class="co">#&gt; 497:       1  1984      50 0.02272727   Cohort    50</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true"></a><span class="co">#&gt; 498:       1  1988      50 0.02272727   Cohort    50</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true"></a><span class="co">#&gt; 499:       1  1992      50 0.02272727   Cohort    50</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true"></a><span class="co">#&gt; 500:       1  1996      50 0.02272727   Cohort    50</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true"></a><span class="co">#&gt; 501:       1  2000      50 0.02272727   Cohort    50</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true"></a><span class="co">## See return value</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true"></a><span class="kw">doubleGauss</span>(<span class="dt">dat =</span> dat, <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>, <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>, <span class="dt">concave =</span> <span class="ot">TRUE</span>)</span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true"></a><span class="co">#&gt; $formula</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true"></a><span class="co">#&gt; Fixations ~ (Time &lt; mu) * (exp(-1 * (Time - mu)^2/(2 * sig1^2)) * </span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true"></a><span class="co">#&gt;     (ht - base1) + base1) + (mu &lt;= Time) * (exp(-1 * (Time - </span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true"></a><span class="co">#&gt;     mu)^2/(2 * sig2^2)) * (ht - base2) + base2)</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true"></a><span class="co">#&gt; attr(,&quot;parnames&quot;)</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true"></a><span class="co">#&gt; [1] &quot;mu&quot;    &quot;ht&quot;    &quot;sig1&quot;  &quot;sig2&quot;  &quot;base1&quot; &quot;base2&quot;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true"></a><span class="co">#&gt; </span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true"></a><span class="co">#&gt; $params</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true"></a><span class="co">#&gt;           mu           ht         sig1         sig2        base1        base2 </span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true"></a><span class="co">#&gt; 428.00000000   0.21590909 152.00000000 396.00000000   0.01136364   0.02272727</span></span></code></pre></div>
 <p>We will now create an entirely new function that is not included in <code>bdots</code> to demonstrate that it works the same; the only change we will make is to substitute in the values for <code>y</code> and <code>time</code> without using <code>str2lang</code>. For our data set here, the corresponding values to <code>y</code> and <code>time</code> are <code>&quot;Fixations&quot;</code> and <code>&quot;Time&quot;</code>, respectively</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">doubleGauss2 &lt;-<span class="st"> </span><span class="cf">function</span> (dat, y, time, <span class="dt">params =</span> <span class="ot">NULL</span>, <span class="dt">concave =</span> <span class="ot">TRUE</span>, ...) {
-  
-  <span class="cf">if</span> (<span class="kw">is.null</span>(params)) {
-    ## Instead of defining our own, just reuse the one in bdots
-    params &lt;-<span class="st"> </span>bdots<span class="op">:::</span><span class="kw">dgaussPars</span>(dat, y, time, concave)
-  }
-  <span class="cf">else</span> {
-    <span class="cf">if</span> (<span class="kw">length</span>(params) <span class="op">!=</span><span class="st"> </span><span class="dv">6</span>) 
-      <span class="kw">stop</span>(<span class="st">&quot;doubleGauss requires 6 parameters be specified for refitting&quot;</span>)
-    <span class="cf">if</span> (<span class="op">!</span><span class="kw">all</span>(<span class="kw">names</span>(params) <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;mu&quot;</span>, <span class="st">&quot;ht&quot;</span>, <span class="st">&quot;sig1&quot;</span>, <span class="st">&quot;sig2&quot;</span>, 
-                                  <span class="st">&quot;base1&quot;</span>, <span class="st">&quot;base2&quot;</span>))) {
-      <span class="kw">stop</span>(<span class="st">&quot;doubleGauss parameters for refitting must be correctly labeled&quot;</span>)
-    }
-  }
-
-    ## Here, we use Fixations and Time directly
-    ff &lt;-<span class="st"> </span><span class="kw">bquote</span>(Fixations <span class="op">~</span><span class="st"> </span>(Time <span class="op">&lt;</span><span class="st"> </span>mu) <span class="op">*</span><span class="st"> </span>(<span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span> <span class="op">*</span><span class="st"> </span>(Time <span class="op">-</span><span class="st"> </span>mu)<span class="op">^</span><span class="dv">2</span> <span class="op">/</span><span class="st"> </span>
-<span class="st">                  </span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>sig1<span class="op">^</span><span class="dv">2</span>)) <span class="op">*</span><span class="st"> </span>(ht <span class="op">-</span><span class="st"> </span>base1) <span class="op">+</span><span class="st"> </span>base1) <span class="op">+</span><span class="st"> </span>(mu <span class="op">&lt;=</span><span class="st"> </span>Time) <span class="op">*</span><span class="st"> </span>
-<span class="st">                  </span>(<span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span> <span class="op">*</span><span class="st"> </span>(Time <span class="op">-</span><span class="st"> </span>mu)<span class="op">^</span><span class="dv">2</span><span class="op">/</span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>sig2<span class="op">^</span><span class="dv">2</span>)) <span class="op">*</span><span class="st"> </span>(ht <span class="op">-</span><span class="st"> </span>base2) <span class="op">+</span><span class="st"> </span>base2))
-    <span class="kw">return</span>(<span class="kw">list</span>(<span class="dt">formula =</span> ff, <span class="dt">params =</span> params))
-}
-
-same_fit_different_day &lt;-<span class="st"> </span><span class="kw">bdotsFit</span>(<span class="dt">data =</span> cohort_unrelated,
-                                   <span class="dt">subject =</span> <span class="st">&quot;Subject&quot;</span>,
-                                   <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>,
-                                   <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>,
-                                   <span class="dt">group =</span> <span class="kw">c</span>(<span class="st">&quot;DB_cond&quot;</span>, <span class="st">&quot;LookType&quot;</span>),
-                                   <span class="dt">curveType =</span> <span class="kw">doubleGauss2</span>(<span class="dt">concave =</span> <span class="ot">TRUE</span>),
-                                   <span class="dt">cores =</span> <span class="dv">2</span>)</code></pre></div>
+<div class="sourceCode" id="cb5"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true"></a>doubleGauss2 &lt;-<span class="st"> </span><span class="cf">function</span> (dat, y, time, <span class="dt">params =</span> <span class="ot">NULL</span>, <span class="dt">concave =</span> <span class="ot">TRUE</span>, ...) {</span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true"></a>  </span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true"></a>  <span class="cf">if</span> (<span class="kw">is.null</span>(params)) {</span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true"></a>    <span class="co">## Instead of defining our own, just reuse the one in bdots</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true"></a>    params &lt;-<span class="st"> </span>bdots<span class="op">:::</span><span class="kw">dgaussPars</span>(dat, y, time, concave)</span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true"></a>  }</span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true"></a>  <span class="cf">else</span> {</span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true"></a>    <span class="cf">if</span> (<span class="kw">length</span>(params) <span class="op">!=</span><span class="st"> </span><span class="dv">6</span>) </span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true"></a>      <span class="kw">stop</span>(<span class="st">&quot;doubleGauss requires 6 parameters be specified for refitting&quot;</span>)</span>
+<span id="cb5-10"><a href="#cb5-10" aria-hidden="true"></a>    <span class="cf">if</span> (<span class="op">!</span><span class="kw">all</span>(<span class="kw">names</span>(params) <span class="op">%in%</span><span class="st"> </span><span class="kw">c</span>(<span class="st">&quot;mu&quot;</span>, <span class="st">&quot;ht&quot;</span>, <span class="st">&quot;sig1&quot;</span>, <span class="st">&quot;sig2&quot;</span>, </span>
+<span id="cb5-11"><a href="#cb5-11" aria-hidden="true"></a>                                  <span class="st">&quot;base1&quot;</span>, <span class="st">&quot;base2&quot;</span>))) {</span>
+<span id="cb5-12"><a href="#cb5-12" aria-hidden="true"></a>      <span class="kw">stop</span>(<span class="st">&quot;doubleGauss parameters for refitting must be correctly labeled&quot;</span>)</span>
+<span id="cb5-13"><a href="#cb5-13" aria-hidden="true"></a>    }</span>
+<span id="cb5-14"><a href="#cb5-14" aria-hidden="true"></a>  }</span>
+<span id="cb5-15"><a href="#cb5-15" aria-hidden="true"></a></span>
+<span id="cb5-16"><a href="#cb5-16" aria-hidden="true"></a>    <span class="co">## Here, we use Fixations and Time directly</span></span>
+<span id="cb5-17"><a href="#cb5-17" aria-hidden="true"></a>    ff &lt;-<span class="st"> </span><span class="kw">bquote</span>(Fixations <span class="op">~</span><span class="st"> </span>(Time <span class="op">&lt;</span><span class="st"> </span>mu) <span class="op">*</span><span class="st"> </span>(<span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span> <span class="op">*</span><span class="st"> </span>(Time <span class="op">-</span><span class="st"> </span>mu)<span class="op">^</span><span class="dv">2</span> <span class="op">/</span><span class="st"> </span></span>
+<span id="cb5-18"><a href="#cb5-18" aria-hidden="true"></a><span class="st">                  </span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>sig1<span class="op">^</span><span class="dv">2</span>)) <span class="op">*</span><span class="st"> </span>(ht <span class="op">-</span><span class="st"> </span>base1) <span class="op">+</span><span class="st"> </span>base1) <span class="op">+</span><span class="st"> </span>(mu <span class="op">&lt;=</span><span class="st"> </span>Time) <span class="op">*</span><span class="st"> </span></span>
+<span id="cb5-19"><a href="#cb5-19" aria-hidden="true"></a><span class="st">                  </span>(<span class="kw">exp</span>(<span class="op">-</span><span class="dv">1</span> <span class="op">*</span><span class="st"> </span>(Time <span class="op">-</span><span class="st"> </span>mu)<span class="op">^</span><span class="dv">2</span><span class="op">/</span>(<span class="dv">2</span> <span class="op">*</span><span class="st"> </span>sig2<span class="op">^</span><span class="dv">2</span>)) <span class="op">*</span><span class="st"> </span>(ht <span class="op">-</span><span class="st"> </span>base2) <span class="op">+</span><span class="st"> </span>base2))</span>
+<span id="cb5-20"><a href="#cb5-20" aria-hidden="true"></a>    <span class="kw">return</span>(<span class="kw">list</span>(<span class="dt">formula =</span> ff, <span class="dt">params =</span> params))</span>
+<span id="cb5-21"><a href="#cb5-21" aria-hidden="true"></a>}</span>
+<span id="cb5-22"><a href="#cb5-22" aria-hidden="true"></a></span>
+<span id="cb5-23"><a href="#cb5-23" aria-hidden="true"></a>same_fit_different_day &lt;-<span class="st"> </span><span class="kw">bfit</span>(<span class="dt">data =</span> cohort_unrelated,</span>
+<span id="cb5-24"><a href="#cb5-24" aria-hidden="true"></a>                               <span class="dt">subject =</span> <span class="st">&quot;Subject&quot;</span>,</span>
+<span id="cb5-25"><a href="#cb5-25" aria-hidden="true"></a>                               <span class="dt">time =</span> <span class="st">&quot;Time&quot;</span>,</span>
+<span id="cb5-26"><a href="#cb5-26" aria-hidden="true"></a>                               <span class="dt">y =</span> <span class="st">&quot;Fixations&quot;</span>,</span>
+<span id="cb5-27"><a href="#cb5-27" aria-hidden="true"></a>                               <span class="dt">group =</span> <span class="kw">c</span>(<span class="st">&quot;DB_cond&quot;</span>, <span class="st">&quot;LookType&quot;</span>),</span>
+<span id="cb5-28"><a href="#cb5-28" aria-hidden="true"></a>                               <span class="dt">curveFun =</span> <span class="kw">doubleGauss2</span>(<span class="dt">concave =</span> <span class="ot">TRUE</span>),</span>
+<span id="cb5-29"><a href="#cb5-29" aria-hidden="true"></a>                               <span class="dt">cores =</span> <span class="dv">2</span>)</span></code></pre></div>
 <p>Seeds have not yet been implemented, so there is some possibility that the resulting parameters are slightly different; however, using the <code>coef</code> function, we can roughly confirm their equivalence</p>
-<div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">## Original fit
-<span class="kw">head</span>(<span class="kw">coef</span>(fit))
-<span class="co">#&gt;            mu        ht     sig1     sig2        base1      base2</span>
-<span class="co">#&gt; [1,] 429.7595 0.1985978 159.8869 314.6389  0.009709772 0.03376106</span>
-<span class="co">#&gt; [2,] 634.9292 0.2635044 303.8081 215.3845 -0.020636092 0.02892360</span>
-<span class="co">#&gt; [3,] 647.0655 0.2543769 518.9632 255.9871 -0.213087597 0.01368195</span>
-<span class="co">#&gt; [4,] 723.0551 0.2582110 392.9509 252.9381 -0.054827082 0.03197292</span>
-<span class="co">#&gt; [5,] 501.4843 0.2247729 500.8605 158.4164 -0.331698893 0.02522686</span>
-<span class="co">#&gt; [6,] 460.7152 0.3067659 382.7323 166.0833 -0.243308940 0.03992168</span>
-
-## &quot;New&quot; fit
-<span class="kw">head</span>(<span class="kw">coef</span>(same_fit_different_day))
-<span class="co">#&gt;            mu        ht     sig1     sig2       base1      base2</span>
-<span class="co">#&gt; [1,] 424.0311 0.1985000 154.2040 319.4740  0.01136408 0.03363656</span>
-<span class="co">#&gt; [2,] 634.8093 0.2635148 303.6648 215.4307 -0.02058587 0.02893339</span>
-<span class="co">#&gt; [3,] 646.9448 0.2544417 517.6521 255.9967 -0.21165093 0.01357057</span>
-<span class="co">#&gt; [4,] 723.0861 0.2582117 393.0037 252.9037 -0.05485216 0.03197492</span>
-<span class="co">#&gt; [5,] 501.6132 0.2247893 500.9494 158.3115 -0.33217172 0.02522935</span>
-<span class="co">#&gt; [6,] 460.7371 0.3067971 382.5232 165.9932 -0.24285941 0.03993349</span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true"></a><span class="co">## Original fit</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true"></a><span class="kw">head</span>(<span class="kw">coef</span>(fit))</span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true"></a><span class="co">#&gt;            mu        ht     sig1     sig2       base1      base2</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true"></a><span class="co">#&gt; [1,] 417.6899 0.1986711 145.5628 323.1882  0.01586359 0.03412371</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true"></a><span class="co">#&gt; [2,] 636.8447 0.2632815 306.2330 214.9787 -0.02154793 0.02858644</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true"></a><span class="co">#&gt; [3,] 647.5295 0.2547779 496.6745 256.4257 -0.18223561 0.01217570</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true"></a><span class="co">#&gt; [4,] 734.1526 0.2585742 405.6348 240.2926 -0.05751246 0.03455280</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true"></a><span class="co">#&gt; [5,] 501.1949 0.2258572 398.7760 158.6752 -0.16159477 0.02529158</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true"></a><span class="co">#&gt; [6,] 460.7152 0.3067659 382.7322 166.0833 -0.24330874 0.03992168</span></span>
+<span id="cb6-10"><a href="#cb6-10" aria-hidden="true"></a></span>
+<span id="cb6-11"><a href="#cb6-11" aria-hidden="true"></a><span class="co">## &quot;New&quot; fit</span></span>
+<span id="cb6-12"><a href="#cb6-12" aria-hidden="true"></a><span class="kw">head</span>(<span class="kw">coef</span>(same_fit_different_day))</span>
+<span id="cb6-13"><a href="#cb6-13" aria-hidden="true"></a><span class="co">#&gt;            mu        ht     sig1     sig2       base1      base2</span></span>
+<span id="cb6-14"><a href="#cb6-14" aria-hidden="true"></a><span class="co">#&gt; [1,] 417.6711 0.1986803 145.5512 323.1345  0.01584786 0.03413375</span></span>
+<span id="cb6-15"><a href="#cb6-15" aria-hidden="true"></a><span class="co">#&gt; [2,] 636.9013 0.2632786 306.3315 214.9348 -0.02159766 0.02858820</span></span>
+<span id="cb6-16"><a href="#cb6-16" aria-hidden="true"></a><span class="co">#&gt; [3,] 647.5815 0.2547770 496.8806 256.3763 -0.18243223 0.01217936</span></span>
+<span id="cb6-17"><a href="#cb6-17" aria-hidden="true"></a><span class="co">#&gt; [4,] 734.1179 0.2585766 405.5336 240.3189 -0.05744377 0.03455157</span></span>
+<span id="cb6-18"><a href="#cb6-18" aria-hidden="true"></a><span class="co">#&gt; [5,] 501.3765 0.2258482 399.5403 158.5325 -0.16241724 0.02529587</span></span>
+<span id="cb6-19"><a href="#cb6-19" aria-hidden="true"></a><span class="co">#&gt; [6,] 460.7371 0.3067971 382.5242 165.9933 -0.24286115 0.03993348</span></span></code></pre></div>
 
 
 

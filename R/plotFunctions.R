@@ -203,13 +203,32 @@ plotFits2 <- function(bdObj, gridSize = NULL, ...) {
   if (nrow(bdObj) < 4 & gridSize != "refit") gridSize <- 1
 
   ## Eventually we will delete this
-  X <- attr(bdObj, "X")$X
+  ## And actually, this doesn't even work for the refit
+  #X <- attr(bdObj, "X")$X
+  X <- getSubX(bdObj)
   Xs <- split(X, by = splitVars)
   bds <- split(bdObj, by = splitVars)
+
+
+  ## Crappy workaround for an already crappy workaround
+  if (gridSize == "refit") {
+    ## Because everything else will be identical
+    #bds <- split(bdObj, by = "R2") # But this could be identical
+    ## Dumb solution here, but fits may be identical
+    nr <- nrow(bdObj)
+    bds <- vector("list", length = nr)
+    for (j in seq_len(nr)) {
+      bds[[j]] <- bdObj[j, ]
+    }
+    x2 <- getSubX(bdObj)
+    Xs <- split(x2, by = splitVars)
+  }
+
 
   ## Vector with each subject's own time
   time_s <- lapply(Xs, `[[`, tname)
 
+  ## This doesn't work for refit
   plotList <- Map(function(bd, xs) {
     timevec <- xs[[tname]]
 

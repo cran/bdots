@@ -9,8 +9,12 @@
 #' @param alpha Significance level
 #' @param padj Adjustment to make to pvalues for significance. Will be able to
 #' use anything from \code{p.adjust} function, but for now, just "oleson"
+#' @param permutation Boolean indicating whether to use permutation testing rather
+#' thank adjusting alpha to control FWER. WARNING: This option is very much in beta testing
+#' and not recommended for general use. Also not available for paired tests or difference of difference
 #' @param cores Number of cores to use in parallel. Default is zero, which
 #' uses half of what is available.
+#' @param permAddVar Boolean. Add observed within-subject variability for permutation testing?
 #' @param ... not used
 #'
 #' @details The formula is the only tricky part of this. There will be a minor
@@ -27,14 +31,14 @@
 #' values of v_i will be implied by the group with which they are associated.
 #'
 #' For example, if we have groups \code{vehicle} and \code{color}, we could specify
-#' that we are interested in all blue cars and trucks with the expression
+#' that we are interested in all red cars and trucks with the expression
 #' \code{vehicle(car, truck) + color(red)}.
 #'
 #' ## Formula
 #'
 #' ### Bootstrapped difference of curves
 #'
-#' This illustrates the case in which we are taking a simple bootstraped difference
+#' This illustrates the case in which we are taking a simple bootstrapped difference
 #' between two curves within a single group
 #'
 #' If only one group was provided in \code{bdotsFit}, we can take the bootstrapped
@@ -72,7 +76,7 @@
 #' As our primary object of interest here is not the difference in outcome itself, but the difference
 #' of the outcome within two groups, the LHS of the formula is written
 #' \code{diffs(y, Group1(val1, val2))}, where Group1 is the innerGroup. The RHS
-#' is then used to specify the groups of which we want to take the inner difference of. The
+#' is then used to specify the groups of which we want to take the outer difference of. The
 #' syntax here is the same as above. Together, then, the formula looks like
 #'
 #' \code{diffs(y, Group1(val1, val2)) ~ Group2(val1, val2)}
@@ -91,31 +95,45 @@
 #'
 #' ## fit <- bdotsFit(cohort_unrelated, ...)
 #'
-#' boot1 <- bdotsBoot(formula = diffs(Fixations, LookType(Cohort, Unrelated_Cohort)) ~ Group(50, 65),
-#'                    bdObj = fit,
-#'                    N.iter = 1000,
-#'                    alpha = 0.05,
-#'                    p.adj = "oleson",
-#'                    cores = 4)
+#' boot1 <- bboot(formula = diffs(Fixations, LookType(Cohort, Unrelated_Cohort)) ~ Group(50, 65),
+#'                bdObj = fit,
+#'                N.iter = 1000,
+#'                alpha = 0.05,
+#'                p.adj = "oleson",
+#'                cores = 4)
 #'
-#' boot2 <- bdotsBoot(formula = Fixations ~ Group(50, 65) + LookType(Cohort),
-#'                    bdObj = fit,
-#'                    N.iter = 1000,
-#'                    alpha = 0.05,
-#'                    p.adj = "oleson",
-#'                    cores = 4)
+#' boot2 <- bboot(formula = Fixations ~ Group(50, 65) + LookType(Cohort),
+#'                bdObj = fit,
+#'                N.iter = 1000,
+#'                alpha = 0.05,
+#'                p.adj = "oleson",
+#'                cores = 4)
 #' }
 #'
 #' @import data.table
 #' @export
+bboot <- function(formula,
+                  bdObj,
+                  Niter = 1000,
+                  alpha = 0.05,
+                  padj = "oleson",
+                  permutation = TRUE,
+                  permAddVar = TRUE,
+                  cores = 0, ...) {
 
-bdotsBoot <- function(formula,
-                      bdObj,
-                      Niter = 1000,
-                      alpha = 0.05,
-                      padj = "oleson",
-                      cores = 0, ...) {
 
+  ## These are secret shortcuts used for methods paper but not intended
+  ## for distribution or general use
+
+  ## singleMeans - 'original' bdots implementation, that which we are showing is faulty
+  ## skipDist - only useful for permutation method, skips construction of bootstrapped distribution
+
+  dd <- list(...) # Evaluate arguments in dots
+  singleMeans <- ifelse(is.null(dd[["singleMeans"]]), FALSE, dd[["singleMeans"]])
+  skipDist <- ifelse(!is.null(dd[["skipDist"]]) & permutation, dd[["skipDist"]], FALSE)
+
+
+  ## Rest of the function as normal
   if (cores < 1) cores <- detectCores()/2
 
   if (any(bdObj[['fitCode']] == 6)) {
@@ -129,24 +147,78 @@ bdotsBoot <- function(formula,
   outerDiff <- prs[["outerDiff"]] # unnamed char vec
 
   curveGrps <- setNames(prs[['subargs']], prs[['subnames']])
-
   curveFun <- makeCurveFun(bdObj)
 
-  curveList <- curveBooter(bdObj,
-                           outerDiff = outerDiff,
-                           innerDiff = innerDiff,
-                           N.iter = Niter,
-                           curveFun = curveFun)
-  ip <- curveList[['diff']][['paired']]
+  ## Next, we want to get a bootstrapped distribution for each of the groups
+  splitGroups <- split(bdObj, by = c(innerDiff, outerDiff)) # ok even if null
 
-  res <- alphaAdjust(curveList, padj, alpha, cores)
-  pval <- res[['pval']]
-  rho <- res[['rho']]
-  alphastar <- res[['alphastar']]
-  adjpval <- res[['adjpval']]
-  time <- attr(bdObj, "time")
-  sigTime <- bucket(adjpval <= alpha, time)
+  ## This cannot stay here forever, its only here until methods published
+  ## Basically only keep !singleMeans
+  #browser()
+
+  if (skipDist) {
+    # just skip doing this
+    curveList <- NULL
+    ip <- NULL
+  } else if (singleMeans) {
+    ## THIS IS RUNNING UNDER SINGLE MEANS ASSUMPTION
+    # pulled from old bdots in curveBooter_SINGLEMEAN.R
+    curveList <- curveBooter_sm(bdObj,
+                             outerDiff = outerDiff,
+                             innerDiff = innerDiff,
+                             N.iter = Niter,
+                             curveFun = curveFun)
+    ip <- curveList[['diff']][['paired']]
+  } else {
+    ## This is the standard thing to happen, delete everything else in this if condition
+    ##  parallel moved inside of this function
+    groupDists <- createGroupDists(splitGroups, prs, b = Niter, cores)
+
+    ## This is where we construct inner/outer groups
+    curveList <- createCurveList(groupDists, prs, splitGroups) # this is whats creates diff
+    ip <- curveList[['diff']][['paired']]
+  }
+
+  # Determine first if we are doing difference of differences
   dod <- ifelse(is.null(innerDiff), FALSE, TRUE)
+
+  ## Currently permutation doesnt exist for dod
+  if (dod & permutation) {
+    warning("Permutation testing does not yet work for difference of difference analysis. Switching to padj='oleson' instead")
+    permutation <- FALSE
+  }
+
+  ## And here we determine significant regions
+  if (permutation) {
+    # do permutation
+    res <- permTest(splitGroups, prs, alpha = alpha, P = Niter, cores = cores,
+                    pAddVar = permAddVar) # in permutation.R
+    obsT <- res[['obst']]
+    nullT <- res[['nullt']]
+
+    # Do I want to return null distribution and vectors?
+    # Do I compute any pvalues here? For now, just significant time
+    time <- attr(bdObj, "time")
+    sigTime <- bucket(res[["sigIdx"]], time)
+
+    # Remove things we don't need (temporary)
+    pval <- NULL
+    rho <- NULL
+    alphastar <- NULL
+    adjpval <- NULL
+  } else {
+    res <- alphaAdjust(curveList, padj, alpha, cores)
+    pval <- res[['pval']]
+    rho <- res[['rho']]
+    alphastar <- res[['alphastar']]
+    adjpval <- res[['adjpval']]
+    time <- attr(bdObj, "time")
+    sigTime <- bucket(adjpval <= alpha, time)
+
+    # Remove things from perm (this is temporary fix)
+    obsT <- NULL
+    nullT <- NULL
+  }
 
   ## maybe consider keeping ancillary data in list, i.e., res.
   structure(class = "bdotsBootObj",
@@ -165,11 +237,4 @@ bdotsBoot <- function(formula,
             call = match.call(),
             bdObjAttr = attributes(bdObj))
 }
-
-
-
-
-
-
-
 

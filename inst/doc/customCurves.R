@@ -1,4 +1,4 @@
-## ---- include = FALSE---------------------------------------------------------
+## ----include = FALSE----------------------------------------------------------
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
@@ -6,6 +6,7 @@ knitr::opts_chunk$set(
 
 ## ----setup, include = FALSE---------------------------------------------------
 library(bdots)
+library(data.table)
 # Make smaller for cran
 cohort_unrelated$Subject <- as.numeric(cohort_unrelated$Subject)
 cohort_unrelated <- as.data.table(cohort_unrelated)
@@ -14,13 +15,13 @@ cohort_unrelated <- cohort_unrelated[Subject < 10, ]
 ## -----------------------------------------------------------------------------
 library(bdots)
 
-fit <- bdotsFit(data = cohort_unrelated,
-                subject = "Subject",
-                time = "Time",
-                y = "Fixations",
-                group = c("DB_cond", "LookType"),
-                curveType = doubleGauss(concave = TRUE),
-                cores = 2)
+fit <- bfit(data = cohort_unrelated,
+            subject = "Subject",
+            time = "Time",
+            y = "Fixations",
+            group = c("DB_cond", "LookType"),
+            curveFun = doubleGauss(concave = TRUE),
+            cores = 2)
 
 ## -----------------------------------------------------------------------------
 doubleGauss
@@ -57,13 +58,13 @@ doubleGauss2 <- function (dat, y, time, params = NULL, concave = TRUE, ...) {
     return(list(formula = ff, params = params))
 }
 
-same_fit_different_day <- bdotsFit(data = cohort_unrelated,
-                                   subject = "Subject",
-                                   time = "Time",
-                                   y = "Fixations",
-                                   group = c("DB_cond", "LookType"),
-                                   curveType = doubleGauss2(concave = TRUE),
-                                   cores = 2)
+same_fit_different_day <- bfit(data = cohort_unrelated,
+                               subject = "Subject",
+                               time = "Time",
+                               y = "Fixations",
+                               group = c("DB_cond", "LookType"),
+                               curveFun = doubleGauss2(concave = TRUE),
+                               cores = 2)
 
 ## -----------------------------------------------------------------------------
 ## Original fit
